@@ -5,7 +5,7 @@ import seaborn
 
 repo = git.Repo(sys.argv[1])
 fm = '%Y'
-interval = 30 * 24 * 60 * 60
+interval = 7 * 24 * 60 * 60
 commit2cohort = {}
 
 for commit in repo.iter_commits('master'):
@@ -37,16 +37,16 @@ for commit in repo.iter_commits('master'):
     for cohort, curve in curves.items():
         curve.append(histogram.get(cohort, 0))
 
-def rev(l):
-    return list(reversed(l))
-cohorts = list(sorted(curves.keys()))
-x = rev(ts)
-y = numpy.array([rev(curves[cohort]) for cohort in cohorts])
-print(y)
-pyplot.stackplot(x, y, labels=cohorts)
-pyplot.legend(loc=2)
-pyplot.savefit('cohorts.png')
-pyplot.show()
+    def rev(l):
+        return list(reversed(l))
+    cohorts = list(sorted(curves.keys()))
+    x = rev(ts)
+    y = numpy.array([rev(curves[cohort]) for cohort in cohorts])
+    pyplot.clf()
+    pyplot.stackplot(x, y, labels=['Code added in %s' % c for c in cohorts])
+    pyplot.legend(loc=2)
+    pyplot.ylabel('Lines of code')
+    pyplot.savefig('cohorts.png')
 
 
         
