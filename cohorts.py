@@ -1,7 +1,7 @@
 from __future__ import print_function
-import git, sys, datetime, numpy
+import git, sys, datetime, numpy, traceback
 from matplotlib import pyplot
-import seaborn
+import seaborn, progressbar
 
 repo = git.Repo(sys.argv[1])
 fm = '%Y'
@@ -24,15 +24,18 @@ for commit in repo.iter_commits('master'):
     
     last_date = commit.committed_date
     histogram = {}
-    for entry in commit.tree.traverse():
-        if entry.type != 'blob':
-            continue
-        if not entry.mime_type.startswith('text/'):
-            continue
-        for old_commit, lines in repo.blame(commit, entry.path):
-            cohort = commit2cohort[old_commit.hexsha]
-            histogram[cohort] = histogram.get(cohort, 0) + len(lines)
-            curves.setdefault(cohort, [])
+    entries = [entry for entry in commit.tree.traverse()
+               if entry.type == 'blob' and entry.mime_type.startswith('text/')]
+    bar = progressbar.ProgressBar(max_value=len(entries))
+    for i, entry in enumerate(entries):
+        bar.update(i)
+        try:
+            for old_commit, lines in repo.blame(commit, entry.path):
+                cohort = commit2cohort[old_commit.hexsha]
+                histogram[cohort] = histogram.get(cohort, 0) + len(lines)
+                curves.setdefault(cohort, [])
+        except:
+            traceback.print_exc()
 
     for cohort, curve in curves.items():
         curve.append(histogram.get(cohort, 0))
@@ -47,6 +50,4 @@ for commit in repo.iter_commits('master'):
     pyplot.legend(loc=2)
     pyplot.ylabel('Lines of code')
     pyplot.savefig('cohorts.png')
-
-
         
