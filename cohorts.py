@@ -13,9 +13,22 @@ for commit in repo.iter_commits('master'):
     commit2cohort[commit.hexsha] = cohort
     commits.append(commit)
 
+def get_file_histogram(commit, path):
+    h = {}
+    try:
+        for old_commit, lines in repo.blame(commit, entry.path):
+            cohort = commit2cohort[old_commit.hexsha]
+            h[cohort] = h.get(cohort, 0) + 1
+    except KeyboardInterrupt:
+        raise
+    except:
+        traceback.print_exc()
+    return h
+
 last_date = None
 curves = {}
 ts = []
+file_histograms = {}
 for commit in reversed(commits):
     if last_date is not None and commit.committed_date < last_date + interval:
         continue
@@ -30,13 +43,10 @@ for commit in reversed(commits):
     bar = progressbar.ProgressBar(max_value=len(entries))
     for i, entry in enumerate(entries):
         bar.update(i)
-        try:
-            for old_commit, lines in repo.blame(commit, entry.path):
-                cohort = commit2cohort[old_commit.hexsha]
-                histogram[cohort] = histogram.get(cohort, 0) + len(lines)
-                curves.setdefault(cohort, [])
-        except:
-            traceback.print_exc()
+        file_histograms[entry.path] = get_file_histogram(commit, entry.path)
+        for cohort, count in file_histograms[entry.path].items():
+            histogram[cohort] = histogram.get(cohort, 0) + count
+            curves.setdefault(cohort, [])
 
     for cohort, curve in curves.items():
         curve.append(histogram.get(cohort, 0))
