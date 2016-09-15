@@ -1,5 +1,5 @@
 from __future__ import print_function
-import git, sys, datetime, numpy, traceback
+import git, sys, datetime, numpy, traceback, time
 from matplotlib import pyplot
 import seaborn, progressbar
 
@@ -32,6 +32,7 @@ curves = {}
 ts = []
 file_histograms = {}
 last_commit = None
+last_redraw = 0.0
 for commit in reversed(commits):
     if last_date is not None and commit.committed_date < last_date + interval:
         continue
@@ -62,11 +63,14 @@ for commit in reversed(commits):
     for cohort, curve in curves.items():
         curve.append(histogram.get(cohort, 0))
 
-cohorts = list(sorted(curves.keys()))
-y = numpy.array([[0] * (len(ts) - len(curves[cohort])) + curves[cohort] for cohort in cohorts])
-pyplot.clf()
-pyplot.stackplot(ts, y, labels=['Code added in %s' % c for c in cohorts])
-pyplot.legend(loc=2)
-pyplot.ylabel('Lines of code')
-pyplot.savefig('cohorts.png')
+    if time.time() - last_redraw > 60.0:
+        last_redraw = time.time()
+        print('redrawing cohort plot...')
+        cohorts = list(sorted(curves.keys()))
+        y = numpy.array([[0] * (len(ts) - len(curves[cohort])) + curves[cohort] for cohort in cohorts])
+        pyplot.clf()
+        pyplot.stackplot(ts, y, labels=['Code added in %s' % c for c in cohorts])
+        pyplot.legend(loc=2)
+        pyplot.ylabel('Lines of code')
+        pyplot.savefig('cohorts.png')
         
