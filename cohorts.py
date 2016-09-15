@@ -29,21 +29,30 @@ last_date = None
 curves = {}
 ts = []
 file_histograms = {}
+last_commit = None
 for commit in reversed(commits):
     if last_date is not None and commit.committed_date < last_date + interval:
         continue
     t = datetime.datetime.utcfromtimestamp(commit.committed_date)
     ts.append(t)
-    print(commit.hexsha, t)
+    changed_files = set()
+    for diff in commit.diff(last_commit):
+        if diff.a_blob:
+            changed_files.add(diff.a_blob.path)
+        if diff.b_blob:
+            changed_files.add(diff.b_blob.path)
+    last_commit = commit
     
     last_date = commit.committed_date
     histogram = {}
     entries = [entry for entry in commit.tree.traverse()
                if entry.type == 'blob' and entry.mime_type.startswith('text/')]
+    print(commit.hexsha, t, len(entries), len(changed_files))
     bar = progressbar.ProgressBar(max_value=len(entries))
     for i, entry in enumerate(entries):
         bar.update(i)
-        file_histograms[entry.path] = get_file_histogram(commit, entry.path)
+        if entry.path in changed_files or entry.path not in file_histograms:
+            file_histograms[entry.path] = get_file_histogram(commit, entry.path)
         for cohort, count in file_histograms[entry.path].items():
             histogram[cohort] = histogram.get(cohort, 0) + count
             curves.setdefault(cohort, [])
