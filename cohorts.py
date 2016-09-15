@@ -8,7 +8,9 @@ fm = '%Y'
 interval = 7 * 24 * 60 * 60
 commit2cohort = {}
 commits = []
-for commit in repo.iter_commits('master'):
+bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
+for i, commit in enumerate(repo.iter_commits('master')):
+    bar.update(i)
     cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(fm)
     commit2cohort[commit.hexsha] = cohort
     commits.append(commit)
