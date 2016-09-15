@@ -7,16 +7,17 @@ repo = git.Repo(sys.argv[1])
 fm = '%Y'
 interval = 7 * 24 * 60 * 60
 commit2cohort = {}
-
+commits = []
 for commit in repo.iter_commits('master'):
     cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(fm)
     commit2cohort[commit.hexsha] = cohort
+    commits.append(commit)
 
 last_date = None
 curves = {}
 ts = []
-for commit in repo.iter_commits('master'):
-    if last_date is not None and commit.committed_date > last_date - interval:
+for commit in reversed(commits):
+    if last_date is not None and commit.committed_date < last_date + interval:
         continue
     t = datetime.datetime.utcfromtimestamp(commit.committed_date)
     ts.append(t)
@@ -40,13 +41,10 @@ for commit in repo.iter_commits('master'):
     for cohort, curve in curves.items():
         curve.append(histogram.get(cohort, 0))
 
-    def rev(l):
-        return list(reversed(l))
     cohorts = list(sorted(curves.keys()))
-    x = rev(ts)
-    y = numpy.array([rev(curves[cohort]) for cohort in cohorts])
+    y = numpy.array([[0] * (len(ts) - len(curves[cohort])) + curves[cohort] for cohort in cohorts])
     pyplot.clf()
-    pyplot.stackplot(x, y, labels=['Code added in %s' % c for c in cohorts])
+    pyplot.stackplot(ts, y, labels=['Code added in %s' % c for c in cohorts])
     pyplot.legend(loc=2)
     pyplot.ylabel('Lines of code')
     pyplot.savefig('cohorts.png')
