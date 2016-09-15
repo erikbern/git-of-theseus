@@ -60,11 +60,11 @@ for commit in reversed(commits):
     for cohort, curve in curves.items():
         curve.append(histogram.get(cohort, 0))
 
-    cohorts = list(sorted(curves.keys()))
-    y = numpy.array([[0] * (len(ts) - len(curves[cohort])) + curves[cohort] for cohort in cohorts])
-    pyplot.clf()
-    pyplot.stackplot(ts, y, labels=['Code added in %s' % c for c in cohorts])
-    pyplot.legend(loc=2)
-    pyplot.ylabel('Lines of code')
-    pyplot.savefig('cohorts.png')
+cohorts = list(sorted(curves.keys()))
+y = numpy.array([[0] * (len(ts) - len(curves[cohort])) + curves[cohort] for cohort in cohorts])
+pyplot.clf()
+pyplot.stackplot(ts, y, labels=['Code added in %s' % c for c in cohorts])
+pyplot.legend(loc=2)
+pyplot.ylabel('Lines of code')
+pyplot.savefig('cohorts.png')
         
