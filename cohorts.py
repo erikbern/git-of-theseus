@@ -7,13 +7,16 @@ repo = git.Repo(sys.argv[1])
 fm = '%Y'
 interval = 7 * 24 * 60 * 60
 commit2cohort = {}
-commits = []
+commits = [] # only stores a subset
 bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
+last_date = None
 for i, commit in enumerate(repo.iter_commits('master')):
     bar.update(i)
     cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(fm)
     commit2cohort[commit.hexsha] = cohort
-    commits.append(commit)
+    if last_date is None or commit.committed_date < last_date - interval:
+        commits.append(commit)
+        last_date = commit.committed_date
 
 def get_file_histogram(commit, path):
     h = {}
@@ -27,14 +30,11 @@ def get_file_histogram(commit, path):
         traceback.print_exc()
     return h
 
-last_date = None
 curves = {}
 ts = []
 file_histograms = {}
 last_commit = None
 for commit in reversed(commits):
-    if last_date is not None and commit.committed_date < last_date + interval:
-        continue
     t = datetime.datetime.utcfromtimestamp(commit.committed_date)
     ts.append(t)
     changed_files = set()
@@ -45,7 +45,6 @@ for commit in reversed(commits):
             changed_files.add(diff.b_blob.path)
     last_commit = commit
     
-    last_date = commit.committed_date
     histogram = {}
     entries = [entry for entry in commit.tree.traverse()
                if entry.type == 'blob' and entry.mime_type.startswith('text/')]
