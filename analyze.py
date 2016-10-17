@@ -1,27 +1,42 @@
 from __future__ import print_function
-import git, sys, datetime, numpy, traceback, time
+import argparse, git, datetime, numpy, traceback, time
 from matplotlib import pyplot
 import seaborn, progressbar
 
-repo = git.Repo(sys.argv[1])
-fm = '%Y'
-interval = 7 * 24 * 60 * 60
+parser = argparse.ArgumentParser(description='Analyze git repo')
+parser.add_argument('--cohortfm', default='%Y', help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
+parser.add_argument('--interval', default=7*24*60*60, type=int, help='Min difference between commits to analyze (default: %(default)s)')
+parser.add_argument('repos', nargs=1)
+args = parser.parse_args()
+
+repo = git.Repo(args.repos[0])
 commit2cohort = {}
 commits = [] # only stores a subset
-bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
 last_date = None
 commit2timestamp = {}
 cohorts_set = set()
 
+bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
 for i, commit in enumerate(repo.iter_commits('master')):
     bar.update(i)
-    cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(fm)
+    cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(args.cohortfm)
     commit2cohort[commit.hexsha] = cohort
     cohorts_set.add(cohort)
-    if last_date is None or commit.committed_date < last_date - interval:
+    if last_date is None or commit.committed_date < last_date - args.interval:
         commits.append(commit)
         last_date = commit.committed_date
         commit2timestamp[commit.hexsha] = commit.committed_date
+
+def get_entries(commit):
+    return [entry for entry in commit.tree.traverse()
+            if entry.type == 'blob' and entry.mime_type.startswith('text/')]
+
+print('Counting total entries to analyze')
+entries_total = 0
+bar = progressbar.ProgressBar(max_value=len(commits))
+for i, commit in enumerate(reversed(commits)):
+    bar.update(i)
+    entries_total += len(get_entries(commit))
 
 def get_file_histogram(commit, path):
     h = {}
@@ -42,6 +57,9 @@ ts = []
 file_histograms = {}
 last_commit = None
 commit_history = {}
+print('Analyzing commit history')
+bar = progressbar.ProgressBar(max_value=entries_total)
+entries_processed = 0
 for commit in reversed(commits):
     t = datetime.datetime.utcfromtimestamp(commit.committed_date)
     ts.append(t)
@@ -56,10 +74,9 @@ for commit in reversed(commits):
     histogram = {}
     entries = [entry for entry in commit.tree.traverse()
                if entry.type == 'blob' and entry.mime_type.startswith('text/')]
-    print(commit.hexsha, t, len(entries), len(changed_files))
-    bar = progressbar.ProgressBar(max_value=len(entries))
-    for i, entry in enumerate(entries):
-        bar.update(i)
+    for entry in entries:
+        bar.update(entries_processed)
+        entries_processed += 1
         if entry.path in changed_files or entry.path not in file_histograms:
             file_histograms[entry.path] = get_file_histogram(commit, entry.path)
         for key, count in file_histograms[entry.path].items():
