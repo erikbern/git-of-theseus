@@ -1,5 +1,5 @@
 from __future__ import print_function
-import argparse, git, datetime, numpy, traceback, time
+import argparse, git, datetime, numpy, traceback, time, os
 from matplotlib import pyplot
 import seaborn, progressbar
 
@@ -15,6 +15,7 @@ commits = [] # only stores a subset
 last_date = None
 commit2timestamp = {}
 cohorts_set = set()
+exts_set = set()
 
 bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
 for i, commit in enumerate(repo.iter_commits('master')):
@@ -29,23 +30,30 @@ for i, commit in enumerate(repo.iter_commits('master')):
 
 def get_entries(commit):
     return [entry for entry in commit.tree.traverse()
-            if entry.type == 'blob' and entry.mime_type.startswith('text/')]
+            if entry.type == 'blob' and entry.mime_type.startswith('text/')
+            #and entry.path.startswith('src/')
+    ]
 
 print('Counting total entries to analyze')
 entries_total = 0
 bar = progressbar.ProgressBar(max_value=len(commits))
 for i, commit in enumerate(reversed(commits)):
     bar.update(i)
-    entries_total += len(get_entries(commit))
+    for entry in get_entries(commit):
+        entries_total += 1
+        _, ext = os.path.splitext(entry.path)
+        exts_set.add(ext)
 
 def get_file_histogram(commit, path):
     h = {}
     try:
-        for old_commit, lines in repo.blame(commit, entry.path):
+        for old_commit, lines in repo.blame(commit, path):
             cohort = commit2cohort[old_commit.hexsha]
             h[cohort] = h.get(cohort, 0) + len(lines)
             if old_commit.hexsha in commit2timestamp:
                 h[old_commit.hexsha] = h.get(old_commit.hexsha, 0) + len(lines)
+            _, ext = os.path.splitext(path)
+            h[ext] = h.get(ext, 0) + len(lines)
     except KeyboardInterrupt:
         raise
     except:
@@ -72,8 +80,7 @@ for commit in reversed(commits):
     last_commit = commit
     
     histogram = {}
-    entries = [entry for entry in commit.tree.traverse()
-               if entry.type == 'blob' and entry.mime_type.startswith('text/')]
+    entries = get_entries(commit)
     for entry in entries:
         bar.update(entries_processed)
         entries_processed += 1
@@ -83,11 +90,14 @@ for commit in reversed(commits):
             histogram[key] = histogram.get(key, 0) + count
 
     for key, count in histogram.items():
-        if key not in cohorts_set:
+        if key not in cohorts_set and key not in exts_set:
             commit_history.setdefault(key, []).append((commit.committed_date, count))
 
     for cohort in cohorts_set:
         curves.setdefault(cohort, []).append(histogram.get(cohort, 0))
+
+    for ext in exts_set:
+        curves.setdefault(ext, []).append(histogram.get(ext, 0))
 
 print('drawing cohort plot...')
 cohorts = sorted(cohorts_set)
@@ -97,6 +107,15 @@ pyplot.stackplot(ts, y, labels=['Code added in %s' % c for c in cohorts])
 pyplot.legend(loc=2)
 pyplot.ylabel('Lines of code')
 pyplot.savefig('cohorts.png')
+
+print('drawing extension plot...')
+exts = sorted(exts_set)
+y = numpy.array([curves[ext] for ext in exts])
+pyplot.clf()
+pyplot.stackplot(ts, y, labels=exts)
+pyplot.legend(loc=2)
+pyplot.ylabel('Lines of code')
+pyplot.savefig('exts.png')
 
 print('drawing survival chart')
 deltas = []
