@@ -6,8 +6,8 @@ import seaborn, progressbar
 parser = argparse.ArgumentParser(description='Analyze git repo')
 parser.add_argument('--cohortfm', default='%Y', help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
 parser.add_argument('--interval', default=7*24*60*60, type=int, help='Min difference between commits to analyze (default: %(default)s)')
-parser.add_argument('--ignore', default=[], action='append', help='File patterns that should be ignored (can provide multiple)')
-parser.add_argument('--only', default=[], action='append', help='File patterns that have to match can provide multiple)')
+parser.add_argument('--ignore', default=[], action='append', help='File patterns that should be ignored (can provide multiple, will each subtract independently)')
+parser.add_argument('--only', default=[], action='append', help='File patterns that have to match (can provide multiple, will all have to match)')
 parser.add_argument('repos', nargs=1)
 args = parser.parse_args()
 
@@ -47,8 +47,8 @@ while True:
 def get_entries(commit):
     return [entry for entry in commit.tree.traverse()
             if entry.type == 'blob'
-            and (not args.only or [pattern for pattern in args.only if fnmatch.fnmatch(entry.path, pattern)])
-            and not [pattern for pattern in args.ignore if fnmatch.fnmatch(entry.path, pattern)]]
+            and all([fnmatch.fnmatch(entry.path, pattern) for pattern in args.only])
+            and not any([fnmatch.fnmatch(entry.path, pattern) for pattern in args.ignore])]
 
 print('Counting total entries to analyze')
 entries_total = 0
