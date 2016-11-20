@@ -20,17 +20,15 @@ exts_set = set()
 
 print('Listing all commits')
 bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
-last_date = None
 for i, commit in enumerate(repo.iter_commits('master')):
     bar.update(i)
     cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(args.cohortfm)
     commit2cohort[commit.hexsha] = cohort
     cohorts_set.add(cohort)
     if len(commit.parents) == 1:
-        if last_date is None or commit.committed_date < last_date - args.interval:
-            code_commits.append(commit)
-            last_date = commit.committed_date
-            commit2timestamp[commit.hexsha] = commit.committed_date
+        code_commits.append(commit)
+        last_date = commit.committed_date
+        commit2timestamp[commit.hexsha] = commit.committed_date
 
 print('Backtracking the master branch')
 bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
