@@ -1,13 +1,12 @@
 from __future__ import print_function
-import argparse, git, datetime, numpy, traceback, time, os, fnmatch
-from matplotlib import pyplot
-import seaborn, progressbar
+import argparse, git, datetime, numpy, traceback, time, os, fnmatch, json, progressbar
 
 parser = argparse.ArgumentParser(description='Analyze git repo')
 parser.add_argument('--cohortfm', default='%Y', help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
 parser.add_argument('--interval', default=7*24*60*60, type=int, help='Min difference between commits to analyze (default: %(default)s)')
 parser.add_argument('--ignore', default=[], action='append', help='File patterns that should be ignored (can provide multiple, will each subtract independently)')
 parser.add_argument('--only', default=[], action='append', help='File patterns that have to match (can provide multiple, will all have to match)')
+parser.add_argument('--outdir', default='.', help='Output directory to store results (default: %(default)s)')
 parser.add_argument('repos', nargs=1)
 args = parser.parse_args()
 
@@ -18,6 +17,8 @@ master_commits = []
 commit2timestamp = {}
 cohorts_set = set()
 exts_set = set()
+if not os.path.exists(args.outdir):
+    os.makedirs(args.outdir)
 
 print('Listing all commits')
 bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
@@ -117,52 +118,23 @@ for commit in reversed(master_commits):
     for ext in exts_set:
         curves.setdefault(ext, []).append(histogram.get(ext, 0))
 
-print('drawing cohort plot...')
+# Dump cohort plot data
 cohorts = sorted(cohorts_set)
-y = numpy.array([curves[cohort] for cohort in cohorts])
-pyplot.clf()
-pyplot.stackplot(ts, y, labels=['Code added in %s' % c for c in cohorts])
-pyplot.legend(loc=2)
-pyplot.ylabel('Lines of code')
-pyplot.savefig('cohorts.png')
+f = open(os.path.join(args.outdir, 'cohorts.json'), 'w')
+json.dump({'y': [curves[cohort] for cohort in cohorts],
+           'ts': [t.isoformat() for t in ts],
+           'labels': ['Code added in %s' % c for c in cohorts]}, f)
+f.close()
 
-print('drawing extension plot...')
+# Dump file extension plot
 exts = sorted(exts_set)
-y = numpy.array([curves[ext] for ext in exts])
-pyplot.clf()
-pyplot.stackplot(ts, y, labels=exts)
-pyplot.legend(loc=2)
-pyplot.ylabel('Lines of code')
-pyplot.savefig('exts.png')
+f = open(os.path.join(args.outdir, 'exts.json'), 'w')
+json.dump({'y': [curves[ext] for ext in exts],
+           'ts': [t.isoformat() for t in ts],
+           'labels': exts}, f)
+f.close()
 
-print('drawing survival chart')
-deltas = []
-total_n = 0
-for commit, history in commit_history.items():
-    t0, orig_count = history[0]
-    total_n += orig_count
-    last_count = orig_count
-    for t, count in history[1:]:
-        deltas.append((t-t0, count-last_count, 0))
-        last_count = count
-    deltas.append((time.time() - t0, -last_count, -orig_count))
-
-deltas.sort()
-total_k = total_n
-xs = []
-ys = []
-for t, delta_k, delta_n in deltas:
-    if t > 3 * 365.25 * 24 * 60 * 60:
-        break
-    xs.append(t / (365.25 * 24 * 60 * 60))
-    ys.append(100. * total_k / total_n)
-    total_k += delta_k
-    total_n += delta_n
-
-pyplot.clf()
-pyplot.plot(xs, ys)
-pyplot.xlabel('Years')
-pyplot.ylabel('%')
-pyplot.ylim([0, 100])
-pyplot.title('% of commit still present in code base over time')
-pyplot.savefig('survival.png')
+# Dump survival data
+f = open(os.path.join(args.outdir, 'survival.json'), 'w')
+json.dump(commit_history, f)
+f.close()
