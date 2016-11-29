@@ -1,10 +1,17 @@
-import sys, seaborn, dateutil.parser, numpy, json, collections, math, scipy.optimize
+import sys, seaborn, dateutil.parser, numpy, json, collections, math, scipy.optimize, argparse
 from matplotlib import pyplot
+
+parser = argparse.ArgumentParser(description='Plot survival plot')
+parser.add_argument('--exp-fit', action='store_true', help='Plot exponential fit')
+parser.add_argument('--years', type=float, default=5, help='Number of years on x axis (default: %(default)s)')
+parser.add_argument('inputs', nargs='*')
+args = parser.parse_args()
 
 all_deltas = []
 YEAR = 365.25 * 24 * 60 * 60
+pyplot.figure(figsize=(13, 8))
 
-for fn in sys.argv[1:]:
+for fn in args.inputs:
     print('reading %s' % fn)
     commit_history = json.load(open(fn))
 
@@ -35,7 +42,11 @@ for fn in sys.argv[1:]:
             break
 
     print('plotting...')
-    pyplot.plot(xs, ys, color='darkgray')
+    if args.exp_fit:
+        pyplot.plot(xs, ys, color='darkgray')
+    else:
+        pyplot.plot(xs, ys)
+
 
 def fit(k):
     loss = 0.0
@@ -50,16 +61,16 @@ def fit(k):
     print(k, loss)
     return loss
 
-print('fitting exponential function')
-k = scipy.optimize.fmin(fit, 1.0, maxiter=50)[0]
-max_t = 5.0
-ts = numpy.linspace(0, max_t, 1000)
-ys = [100. * math.exp(-k * t) for t in ts]
-pyplot.plot(ts, ys, color='red', label='Exponential fit, half-life = %.2f years' % (math.log(2) / k))
+if args.exp_fit:
+    print('fitting exponential function')
+    k = scipy.optimize.fmin(fit, 1.0, maxiter=50)[0]
+    ts = numpy.linspace(0, args.years, 1000)
+    ys = [100. * math.exp(-k * t) for t in ts]
+    pyplot.plot(ts, ys, color='red', label='Exponential fit, half-life = %.2f years' % (math.log(2) / k))
 
 pyplot.xlabel('Years')
 pyplot.ylabel('%')
-pyplot.xlim([0, 5])
+pyplot.xlim([0, args.years])
 pyplot.ylim([0, 100])
 pyplot.title('% of commit still present in code base over time')
 pyplot.legend()
