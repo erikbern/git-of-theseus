@@ -7,6 +7,7 @@ parser.add_argument('--interval', default=7*24*60*60, type=int, help='Min differ
 parser.add_argument('--ignore', default=[], action='append', help='File patterns that should be ignored (can provide multiple, will each subtract independently)')
 parser.add_argument('--only', default=[], action='append', help='File patterns that have to match (can provide multiple, will all have to match)')
 parser.add_argument('--outdir', default='.', help='Output directory to store results (default: %(default)s)')
+parser.add_argument('--branch', default='master', help='Branch to track (default: %(default)s)')
 parser.add_argument('repos', nargs=1)
 args = parser.parse_args()
 
@@ -22,7 +23,7 @@ if not os.path.exists(args.outdir):
 
 print('Listing all commits')
 bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
-for i, commit in enumerate(repo.iter_commits('master')):
+for i, commit in enumerate(repo.iter_commits(args.branch)):
     bar.update(i)
     cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(args.cohortfm)
     commit2cohort[commit.hexsha] = cohort
