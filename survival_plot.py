@@ -1,4 +1,4 @@
-import sys, seaborn, dateutil.parser, numpy, json, collections, math, scipy.optimize, argparse
+import sys, seaborn, dateutil.parser, numpy, json, collections, math, scipy.optimize, argparse, os
 from matplotlib import pyplot
 
 parser = argparse.ArgumentParser(description='Plot survival plot')
@@ -45,7 +45,8 @@ for fn in args.inputs:
     if args.exp_fit:
         pyplot.plot(xs, ys, color='darkgray')
     else:
-        pyplot.plot(xs, ys)
+        parts = os.path.split(fn)
+        pyplot.plot(xs, ys, label=(len(parts) > 1 and parts[-2] or None))
 
 
 def fit(k):
@@ -63,7 +64,7 @@ def fit(k):
 
 if args.exp_fit:
     print('fitting exponential function')
-    k = scipy.optimize.fmin(fit, 1.0, maxiter=50)[0]
+    k = scipy.optimize.fmin(fit, 0.5, maxiter=50)[0]
     ts = numpy.linspace(0, args.years, 1000)
     ys = [100. * math.exp(-k * t) for t in ts]
     pyplot.plot(ts, ys, color='red', label='Exponential fit, half-life = %.2f years' % (math.log(2) / k))
