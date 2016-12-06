@@ -1,6 +1,6 @@
 Some scripts to analyze Git repos. Produces cool looking graphs like this (running it on [git](https://github.com/git/git) itself):
 
-![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git.png)
+![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-git.png)
 
 How to run
 ----------
@@ -8,8 +8,9 @@ How to run
 1. Run `pip install -r requirements.txt` to install dependencies
 2. Run `python analyze.py <path to repo>` (see `python analyze.py --help` for a bunch of config)
 3. Run `python stack_plot.py cohorts.json` which will write to `stack_plot.png`
-4. Run `python survival_plot.py survival.json` which will write to `survival_plot.png`
+4. Run `python survival_plot.py survival.json` which will write to `survival_plot.png` (see `python survival_plot.py --help` for some options)
 
+If you want to plot multiple repositories, have to run `python analyze.py` separately for each project and store the data in separate directories using the `--outdir` flag. Then you can run `python survival_plot.py <foo/survival.json> <bar/survival.json>` (optionally with the `--exp-fit` flag to fit an exponential decay)
 
 Some pics
 ---------
