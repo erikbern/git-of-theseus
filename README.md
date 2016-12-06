@@ -3,7 +3,7 @@ Some scripts to analyze Git repos. Produces cool looking graphs like this (runni
 How to run
 ----------
 
-1. Run `pip install gitpython seaborn numpy` to install dependencies
+1. Run `pip install gitpython seaborn numpy progressbar2` to install dependencies
 2. Run `python analyze.py <path to repo>` (see `python analyze.py --help` for a bunch of config)
 3. Run `python stack_plot.py cohorts.json` which will write to `stack_plot.png`
 4. Run `python survival_plot.py survival.json` which will write to `survival_plot.png`
