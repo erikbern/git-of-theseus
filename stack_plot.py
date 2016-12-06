@@ -7,7 +7,7 @@ parser.add_argument('--outfile', default='stack_plot.png', help='Output file to 
 parser.add_argument('inputs', nargs=1)
 args = parser.parse_args()
 
-data = json.load(open(args.inputs))
+data = json.load(open(args.inputs[0]))
 y = numpy.array(data['y'])
 pyplot.figure(figsize=(13, 8))
 pyplot.stackplot([dateutil.parser.parse(t) for t in data['ts']],
