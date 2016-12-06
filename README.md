@@ -1,5 +1,7 @@
 Some scripts to analyze Git repos. Produces cool looking graphs like this (running it on [git](https://github.com/git/git) itself):
 
+![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git.png)
+
 How to run
 ----------
 
@@ -11,8 +13,6 @@ How to run
 
 Some pics
 ---------
-
-![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git.png)
 
 Survival of a line of code in a set of interesting repos:
 
