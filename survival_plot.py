@@ -3,6 +3,8 @@ from matplotlib import pyplot
 
 parser = argparse.ArgumentParser(description='Plot survival plot')
 parser.add_argument('--exp-fit', action='store_true', help='Plot exponential fit')
+parser.add_argument('--display', action='store_true', help='Display plot')
+parser.add_argument('--outfile', default='survival_plot.png', help='Output file to store results (default: %(default)s)')
 parser.add_argument('--years', type=float, default=5, help='Number of years on x axis (default: %(default)s)')
 parser.add_argument('inputs', nargs='*')
 args = parser.parse_args()
@@ -75,6 +77,6 @@ pyplot.xlim([0, args.years])
 pyplot.ylim([0, 100])
 pyplot.title('% of commit still present in code base over time')
 pyplot.legend()
-pyplot.savefig('survival_plot.png')
-pyplot.show()
-
+pyplot.savefig(args.outfile)
+if args.display:
+    pyplot.show()
