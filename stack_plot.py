@@ -1,7 +1,13 @@
-import sys, seaborn, dateutil.parser, numpy, json
+import sys, seaborn, dateutil.parser, numpy, json, argparse
 from matplotlib import pyplot
 
-data = json.load(open(sys.argv[1]))
+parser = argparse.ArgumentParser(description='Plot stack plot')
+parser.add_argument('--display', action='store_true', help='Display plot')
+parser.add_argument('--outfile', default='stack_plot.png', help='Output file to store results (default: %(default)s)')
+parser.add_argument('inputs', nargs=1)
+args = parser.parse_args()
+
+data = json.load(open(args.inputs))
 y = numpy.array(data['y'])
 pyplot.figure(figsize=(13, 8))
 pyplot.stackplot([dateutil.parser.parse(t) for t in data['ts']],
@@ -9,5 +15,6 @@ pyplot.stackplot([dateutil.parser.parse(t) for t in data['ts']],
                   labels=data['labels'])
 pyplot.legend(loc=2)
 pyplot.ylabel('Lines of code')
-pyplot.savefig('stack_plot.png')
-pyplot.show()
+pyplot.savefig(args.outfile)
+if args.display:
+    pyplot.show()
