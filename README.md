@@ -1,3 +1,5 @@
+![travis badge](https://img.shields.io/travis/erikbern/git-of-theseus/master.svg?style=flat)
+
 Some scripts to analyze Git repos. Produces cool looking graphs like this (running it on [git](https://github.com/git/git) itself):
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-git.png)
