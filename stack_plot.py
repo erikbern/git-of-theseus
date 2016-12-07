@@ -4,7 +4,7 @@ from matplotlib import pyplot
 parser = argparse.ArgumentParser(description='Plot stack plot')
 parser.add_argument('--display', action='store_true', help='Display plot')
 parser.add_argument('--outfile', default='stack_plot.png', help='Output file to store results (default: %(default)s)')
-parser.add_argument('inputs', nargs=1)
+parser.add_argument('inputs')
 args = parser.parse_args()
 
 data = json.load(open(args.inputs))
