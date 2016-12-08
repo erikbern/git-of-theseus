@@ -1,0 +1,11 @@
+got:
+  build: .
+  volumes:
+    - ${GOT_REPOSITORY}:/subject
+    - ./output:/output
+  command: "/run.sh"
+  environment:
+    GOT_SURVIVAL_FIT: ${GOT_SURVIVAL_FIT}
+    GOT_SURVIVAL_YEARS: ${GOT_SURVIVAL_YEARS}
+  stdin_open: true
+  tty: true
