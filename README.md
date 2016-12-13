@@ -14,6 +14,11 @@ How to run
 
 If you want to plot multiple repositories, have to run `python analyze.py` separately for each project and store the data in separate directories using the `--outdir` flag. Then you can run `python survival_plot.py <foo/survival.json> <bar/survival.json>` (optionally with the `--exp-fit` flag to fit an exponential decay)
 
+Help
+----
+
+`AttributeError: Unknown property labels` – upgrade matplotlib if you are seeing this. `pip install matplotlib`
+  
 Some pics
 ---------
 
