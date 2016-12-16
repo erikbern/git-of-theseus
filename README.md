@@ -7,10 +7,12 @@ Some scripts to analyze Git repos. Produces cool looking graphs like this (runni
 How to run
 ----------
 
+1. Run `git clone https://github.com/erikbern/git-of-theseus` and `cd git-of-theseus`
+1. Run `virtualenv .` (optional, only if you don't want to install the dependencies as root or in your local pip installation folder)
 1. Run `pip install -r requirements.txt` to install dependencies
-2. Run `python analyze.py <path to repo>` (see `python analyze.py --help` for a bunch of config)
-3. Run `python stack_plot.py cohorts.json` which will write to `stack_plot.png`
-4. Run `python survival_plot.py survival.json` which will write to `survival_plot.png` (see `python survival_plot.py --help` for some options)
+1. Run `python analyze.py <path to repo>` (see `python analyze.py --help` for a bunch of config)
+1. Run `python stack_plot.py cohorts.json` which will write to `stack_plot.png`
+1. Run `python survival_plot.py survival.json` which will write to `survival_plot.png` (see `python survival_plot.py --help` for some options)
 
 If you want to plot multiple repositories, have to run `python analyze.py` separately for each project and store the data in separate directories using the `--outdir` flag. Then you can run `python survival_plot.py <foo/survival.json> <bar/survival.json>` (optionally with the `--exp-fit` flag to fit an exponential decay)
 
