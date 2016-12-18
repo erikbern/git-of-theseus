@@ -8,7 +8,7 @@ How to run
 ----------
 
 1. Run `git clone https://github.com/erikbern/git-of-theseus` and `cd git-of-theseus`
-1. Run `virtualenv .` (optional, only if you don't want to install the dependencies as root or in your local pip installation folder)
+1. Run `virtualenv .` and then `. bin/activate` (optional, only if you don't want to install the dependencies as root or in your local pip installation folder)
 1. Run `pip install -r requirements.txt` to install dependencies
 1. Run `python analyze.py <path to repo>` (see `python analyze.py --help` for a bunch of config)
 1. Run `python stack_plot.py cohorts.json` which will write to `stack_plot.png`
