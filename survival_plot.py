@@ -91,7 +91,7 @@ pyplot.xlabel('Years')
 pyplot.ylabel('%')
 pyplot.xlim([0, args.years])
 pyplot.ylim([0, 100])
-pyplot.title('% of commit still present in code base over time')
+pyplot.title('% of lines still present in code after n years')
 pyplot.legend()
 pyplot.savefig(args.outfile)
 if args.display:
