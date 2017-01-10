@@ -48,3 +48,7 @@ Rails – stack plot:
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-rails.png)
 
+Other stuff
+-----------
+
+[Markovtsev Vadim](https://twitter.com/tmarkhor) implemented a very similar analysis that claims to be 20%-6x faster than Git of Theseus. It's named [Hercules](https://github.com/src-d/hercules) and there's a great [blog post](https://blog.sourced.tech/post/hercules/) about all the complexity going into the analysis of Git history.
