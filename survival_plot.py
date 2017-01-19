@@ -15,6 +15,10 @@
 # limitations under the License.
 
 import sys, seaborn, dateutil.parser, numpy, json, collections, math, scipy.optimize, argparse, os
+
+import matplotlib
+matplotlib.use('Agg')
+
 from matplotlib import pyplot
 
 parser = argparse.ArgumentParser(description='Plot survival plot')

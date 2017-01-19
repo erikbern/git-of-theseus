@@ -15,6 +15,10 @@
 # limitations under the License.
 
 import sys, seaborn, dateutil.parser, numpy, json, argparse
+
+import matplotlib
+matplotlib.use('Agg')
+
 from matplotlib import pyplot
 
 parser = argparse.ArgumentParser(description='Plot stack plot')
