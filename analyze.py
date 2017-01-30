@@ -84,11 +84,17 @@ def get_file_histogram(commit, path):
     h = {}
     try:
         for old_commit, lines in repo.blame(commit, path):
-            cohort = commit2cohort[old_commit.hexsha]
+            try:
+                if old_commit.hexsha in commit2cohort:
+                    cohort = commit2cohort[old_commit.hexsha]
+            except:
+                traceback.print_exc()
             h[cohort] = h.get(cohort, 0) + len(lines)
+
             if old_commit.hexsha in commit2timestamp:
                 h[old_commit.hexsha] = h.get(old_commit.hexsha, 0) + len(lines)
             _, ext = os.path.splitext(path)
+
             h[ext] = h.get(ext, 0) + len(lines)
     except KeyboardInterrupt:
         raise
