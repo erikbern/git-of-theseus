@@ -84,11 +84,7 @@ def get_file_histogram(commit, path):
     h = {}
     try:
         for old_commit, lines in repo.blame(commit, path):
-            try:
-                if old_commit.hexsha in commit2cohort:
-                    cohort = commit2cohort[old_commit.hexsha]
-            except:
-                traceback.print_exc()
+            cohort = commit2cohort.get(old_commit.hexsha, "MISSING")
             h[cohort] = h.get(cohort, 0) + len(lines)
 
             if old_commit.hexsha in commit2timestamp:
