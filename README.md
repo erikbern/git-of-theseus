@@ -19,7 +19,7 @@ If you want to plot multiple repositories, have to run `python analyze.py` separ
 Help
 ----
 
-`AttributeError: Unknown property labels` – upgrade matplotlib if you are seeing this. `pip install matplotlib`
+`AttributeError: Unknown property labels` – upgrade matplotlib if you are seeing this. `pip install matplotlib --upgrade`
   
 Some pics
 ---------
