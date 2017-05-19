@@ -51,16 +51,18 @@ for fn in args.inputs:
 
     all_deltas.append((total_n, deltas))
     print('adding %d deltas...' % len(deltas))
-    total_k, initial_total_n = total_n, total_n
+    total_k = total_n
+    P = 1.0
     xs = []
     ys = []
     for t in sorted(deltas.keys()):
         delta_k, delta_n = deltas[t]
         xs.append(t / YEAR)
-        ys.append(100. * total_k / total_n)
+        ys.append(100. * P)
+        P *= 1 + delta_k / total_n
         total_k += delta_k
         total_n += delta_n
-        if total_n < 0.05 * initial_total_n:
+        if P < 0.05:
             break
 
     print('plotting...')
@@ -75,10 +77,12 @@ def fit(k):
     loss = 0.0
     for total_n, deltas in all_deltas:
         total_k = total_n
+        P = 1.0
         for t in sorted(deltas.keys()):
             delta_k, delta_n = deltas[t]
             pred = total_n * math.exp(-k * t / YEAR)
-            loss += (total_k - pred)**2
+            loss += (total_n * P - pred)**2
+            P *= 1 + delta_k / total_n
             total_k += delta_k
             total_n += delta_n
     print(k, loss)
