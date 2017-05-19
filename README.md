@@ -28,7 +28,7 @@ Survival of a line of code in a set of interesting repos:
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-projects-survival.png)
 
-This curve is produced by the `survival_plot.py` script and shows the *percentage of lines in a commit that are still present after x years*. It aggregates it over all commits, no matter what point in time they were made. So for *x=0* it includes all commits, whereas for *x>0* not all commits are counted (because we would have to look into the future for some of them). That means the total percentage can go up occasionally.
+This curve is produced by the `survival_plot.py` script and shows the *percentage of lines in a commit that are still present after x years*. It aggregates it over all commits, no matter what point in time they were made. So for *x=0* it includes all commits, whereas for *x>0* not all commits are counted (because we would have to look into the future for some of them). ~~That means the total percentage can go up occasionally.~~ The survival curves are estimated using [Kaplan-Meier](https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator).
 
 You can also add an exponential fit:
 
