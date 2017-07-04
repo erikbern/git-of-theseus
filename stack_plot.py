@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys, seaborn, dateutil.parser, numpy, json, argparse
-
 import matplotlib
 matplotlib.use('Agg')
+
+import sys, seaborn, dateutil.parser, numpy, json, argparse
 
 from matplotlib import pyplot
 
