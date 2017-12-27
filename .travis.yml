@@ -14,6 +14,6 @@ script:
   - git clone https://github.com/erikbern/git-of-theseus
   - git-of-theseus-analyze git-of-theseus --outdir got
   - git-of-theseus-stack-plot got/cohorts.json
+  - git-of-theseus-stack-plot got/exts.json
+  - git-of-theseus-stack-plot got/authors.json
   - git-of-theseus-survival-plot got/survival.json --exp-fit
-
-  
