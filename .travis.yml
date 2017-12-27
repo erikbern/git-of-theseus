@@ -5,15 +5,15 @@ python:
 install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq python-scipy
-  - pip install -r requirements.txt
+  - pip install .
 before_script: # configure a headless display to test plot generation
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
 script:
   - git clone https://github.com/erikbern/git-of-theseus
-  - python analyze.py git-of-theseus --outdir got
-  - python stack_plot.py got/cohorts.json
-  - python survival_plot.py got/survival.json --exp-fit
+  - git-of-theseus-analyze git-of-theseus --outdir got
+  - git-of-theseus-stack-plot got/cohorts.json
+  - git-of-theseus-survival-plot got/survival.json --exp-fit
 
   
