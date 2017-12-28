@@ -12,9 +12,12 @@ Run `pip install git-of-theseus`
 Running
 -------
 
-1. Run `git-of-theseus-analyze <path to repo>` (see `python analyze.py --help` for a bunch of config)
+First, you need to run `git-of-theseus-analyze <path to repo>` (see `python analyze.py --help` for a bunch of config). This will analyze a repository and might take quite some time.
+
+After that, you can generate plots! Here are some ways you can do that:
+
 1. Run `git-of-theseus-stack-plot cohorts.json` which will write to `stack_plot.png`
-1. Run `git-of-theseus-survival-plot survival.json` which will write to `survival_plot.png` (see `python survival_plot.py --help` for some options)
+1. Run `git-of-theseus-survival-plot survival.json` which will write to `survival_plot.png` (run it with `--help` for some options)
 
 If you want to plot multiple repositories, have to run `git-of-theseus-analyze` separately for each project and store the data in separate directories using the `--outdir` flag. Then you can run `git-of-theseus-survival-plot <foo/survival.json> <bar/survival.json>` (optionally with the `--exp-fit` flag to fit an exponential decay)
 
