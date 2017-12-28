@@ -100,7 +100,7 @@ def analyze():
             for old_commit, lines in repo.blame(commit, path):
                 cohort = commit2cohort.get(old_commit.hexsha, "MISSING")
                 _, ext = os.path.splitext(path)
-                keys = [('cohort', cohort), ('ext', ext), ('author', commit.author.name)]
+                keys = [('cohort', cohort), ('ext', ext), ('author', old_commit.author.name)]
 
                 if old_commit.hexsha in commit2timestamp:
                     keys.append(('sha', old_commit.hexsha))
