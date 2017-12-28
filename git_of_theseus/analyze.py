@@ -81,9 +81,9 @@ def analyze():
         return [entry for entry in commit.tree.traverse()
                 if entry.type == 'blob' and entry_path_ok(entry.path)]
 
-    print('Counting total entries to analyze')
+    print('Counting total entries to analyze + caching filenames')
     entries_total = 0
-    bar = progressbar.ProgressBar(max_value=len(master_commits))
+    bar = progressbar.ProgressBar(max_value=len(master_commits), widget_kwargs=dict(samples=1000))
     for i, commit in enumerate(reversed(master_commits)):
         bar.update(i)
         n = 0
@@ -120,7 +120,7 @@ def analyze():
     commit_history = {}
 
     print('Analyzing commit history')
-    bar = progressbar.ProgressBar(max_value=entries_total)
+    bar = progressbar.ProgressBar(max_value=entries_total, widget_kwargs=dict(samples=1000))
     entries_processed = 0
     for commit in reversed(master_commits):
         t = datetime.datetime.utcfromtimestamp(commit.committed_date)
