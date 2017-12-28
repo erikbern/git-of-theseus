@@ -1,5 +1,6 @@
 gitpython
 numpy
 progressbar2
+pygments
 matplotlib
 seaborn

@@ -15,9 +15,13 @@
 # limitations under the License.
 
 from __future__ import print_function
-import argparse, git, datetime, numpy, traceback, time, os, fnmatch, json, progressbar
+import argparse, git, datetime, numpy, pygments.lexers, traceback, time, os, fnmatch, json, progressbar
 
 def analyze():
+    default_filetypes = set()
+    for _, _, filetypes, _ in pygments.lexers.get_all_lexers():
+        default_filetypes.update(filetypes)
+
     parser = argparse.ArgumentParser(description='Analyze git repo')
     parser.add_argument('--cohortfm', default='%Y', help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
     parser.add_argument('--interval', default=7*24*60*60, type=int, help='Min difference between commits to analyze (default: %(default)s)')
@@ -25,6 +29,7 @@ def analyze():
     parser.add_argument('--only', default=[], action='append', help='File patterns that have to match (can provide multiple, will all have to match)')
     parser.add_argument('--outdir', default='.', help='Output directory to store results (default: %(default)s)')
     parser.add_argument('--branch', default='master', help='Branch to track (default: %(default)s)')
+    parser.add_argument('--all-filetypes', action='store_true', help='Include all files (if not set then will only analyze %s' % ','.join(default_filetypes))
     parser.add_argument('repos', nargs=1)
     args = parser.parse_args()
 
@@ -62,11 +67,19 @@ def analyze():
             last_date = commit.committed_date
         i, commit = i+1, commit.parents[0]
 
+    ok_entry_paths = {}
+    def entry_path_ok(path):
+        # All this matching is slow so let's cache it
+        if path not in ok_entry_paths:
+            ok_entry_paths[path] = (
+                (args.all_filetypes or any(fnmatch.fnmatch(path, filetype) for filetype in default_filetypes))
+                and all([fnmatch.fnmatch(path, pattern) for pattern in args.only])
+                and not any([fnmatch.fnmatch(path, pattern) for pattern in args.ignore]))
+        return ok_entry_paths[path]
+
     def get_entries(commit):
         return [entry for entry in commit.tree.traverse()
-                if entry.type == 'blob'
-                and all([fnmatch.fnmatch(entry.path, pattern) for pattern in args.only])
-                and not any([fnmatch.fnmatch(entry.path, pattern) for pattern in args.ignore])]
+                if entry.type == 'blob' and entry_path_ok(entry.path)]
 
     print('Counting total entries to analyze')
     entries_total = 0
