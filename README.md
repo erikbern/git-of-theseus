@@ -56,7 +56,7 @@ Rails – stack plot:
 Plotting other stuff
 --------------------
 
-`git-of-theseus-analyze` will write `exts.json`, `cohorts.json` and `authors.json`. You can run `git-of-theseus-stack-plot authors.json` to plot author statistics as well, or `git-of-thesesus-stack-plot exts.json` to plot file extension statistics. For author statistics, you might want to create a [.mailmap](https://git-scm.com/docs/git-check-mailmap) file to deduplicate authors.
+`git-of-theseus-analyze` will write `exts.json`, `cohorts.json` and `authors.json`. You can run `git-of-theseus-stack-plot authors.json` to plot author statistics as well, or `git-of-theseus-stack-plot exts.json` to plot file extension statistics. For author statistics, you might want to create a [.mailmap](https://git-scm.com/docs/git-check-mailmap) file to deduplicate authors.
 
 Other stuff
 -----------
