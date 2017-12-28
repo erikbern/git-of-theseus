@@ -33,8 +33,7 @@ def analyze():
     code_commits = [] # only stores a subset
     master_commits = []
     commit2timestamp = {}
-    cohorts_set = set()
-    exts_set = set()
+    curves_set = set()
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
 
@@ -44,7 +43,7 @@ def analyze():
         bar.update(i)
         cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(args.cohortfm)
         commit2cohort[commit.hexsha] = cohort
-        cohorts_set.add(cohort)
+        curves_set.add(('cohort', cohort))
         if len(commit.parents) == 1:
             code_commits.append(commit)
             last_date = commit.committed_date
@@ -78,7 +77,8 @@ def analyze():
         for entry in get_entries(commit):
             n += 1
             _, ext = os.path.splitext(entry.path)
-            exts_set.add(ext)
+            curves_set.add(('ext', ext))
+            curves_set.add(('author', commit.author.name))
         entries_total += n
 
     def get_file_histogram(commit, path):
@@ -86,13 +86,14 @@ def analyze():
         try:
             for old_commit, lines in repo.blame(commit, path):
                 cohort = commit2cohort.get(old_commit.hexsha, "MISSING")
-                h[cohort] = h.get(cohort, 0) + len(lines)
+                _, ext = os.path.splitext(path)
+                keys = [('cohort', cohort), ('ext', ext), ('author', commit.author.name)]
 
                 if old_commit.hexsha in commit2timestamp:
-                    h[old_commit.hexsha] = h.get(old_commit.hexsha, 0) + len(lines)
-                _, ext = os.path.splitext(path)
+                    keys.append(('sha', old_commit.hexsha))
 
-                h[ext] = h.get(ext, 0) + len(lines)
+                for key in keys:
+                    h[key] = h.get(key, 0) + len(lines)
         except KeyboardInterrupt:
             raise
         except:
@@ -118,7 +119,7 @@ def analyze():
             if diff.b_blob:
                 changed_files.add(diff.b_blob.path)
         last_commit = commit
-    
+
         histogram = {}
         entries = get_entries(commit)
         for entry in entries:
@@ -130,32 +131,33 @@ def analyze():
                 histogram[key] = histogram.get(key, 0) + count
 
         for key, count in histogram.items():
-            if key not in cohorts_set and key not in exts_set:
-                commit_history.setdefault(key, []).append((commit.committed_date, count))
+            key_type, key_item = key
+            if key_type == 'sha':
+                commit_history.setdefault(key_item, []).append((commit.committed_date, count))
 
-        for cohort in cohorts_set:
-            curves.setdefault(cohort, []).append(histogram.get(cohort, 0))
+        for key in curves_set:
+            curves.setdefault(key, []).append(histogram.get(key, 0))
 
-        for ext in exts_set:
-            curves.setdefault(ext, []).append(histogram.get(ext, 0))
 
-    # Dump cohort plot data
-    cohorts = sorted(cohorts_set)
-    f = open(os.path.join(args.outdir, 'cohorts.json'), 'w')
-    json.dump({'y': [curves[cohort] for cohort in cohorts],
-               'ts': [t.isoformat() for t in ts],
-               'labels': ['Code added in %s' % c for c in cohorts]}, f)
-    f.close()
+    def dump_json(output_fn, key_type, label_fmt=lambda x: x):
+        key_items = sorted(k for t, k in curves_set if t == key_type)
+        f = open(os.path.join(args.outdir, output_fn), 'w')
+        json.dump({'y': [curves[(key_type, key_item)] for key_item in key_items],
+                   'ts': [t.isoformat() for t in ts],
+                   'labels': [label_fmt(key_item) for key_item in key_items]
+        }, f)
+        f.close()
 
-    # Dump file extension plot
-    exts = sorted(exts_set)
-    f = open(os.path.join(args.outdir, 'exts.json'), 'w')
-    json.dump({'y': [curves[ext] for ext in exts],
-               'ts': [t.isoformat() for t in ts],
-               'labels': exts}, f)
-    f.close()
+    # Dump accumulated stuff
+    dump_json('cohorts.json', 'cohort', lambda c: 'Code added in %s' % c)
+    dump_json('exts.json', 'ext')
+    dump_json('authors.json', 'author')
 
     # Dump survival data
     f = open(os.path.join(args.outdir, 'survival.json'), 'w')
     json.dump(commit_history, f)
     f.close()
+
+
+if __name__ == '__main__':
+    analyze()
