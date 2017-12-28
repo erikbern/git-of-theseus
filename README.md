@@ -4,17 +4,19 @@ Some scripts to analyze Git repos. Produces cool looking graphs like this (runni
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-git.png)
 
-How to run
+Installing
 ----------
 
-1. Run `git clone https://github.com/erikbern/git-of-theseus` and `cd git-of-theseus`
-1. Run `virtualenv .` and then `. bin/activate` (optional, only if you don't want to install the dependencies as root or in your local pip installation folder)
-1. Run `pip install -r requirements.txt` to install dependencies
-1. Run `python analyze.py <path to repo>` (see `python analyze.py --help` for a bunch of config)
-1. Run `python stack_plot.py cohorts.json` which will write to `stack_plot.png`
-1. Run `python survival_plot.py survival.json` which will write to `survival_plot.png` (see `python survival_plot.py --help` for some options)
+Run `pip install git-of-theseus`
 
-If you want to plot multiple repositories, have to run `python analyze.py` separately for each project and store the data in separate directories using the `--outdir` flag. Then you can run `python survival_plot.py <foo/survival.json> <bar/survival.json>` (optionally with the `--exp-fit` flag to fit an exponential decay)
+Running
+-------
+
+1. Run `git-of-theseus-analyze <path to repo>` (see `python analyze.py --help` for a bunch of config)
+1. Run `git-of-theseus-stack-plot cohorts.json` which will write to `stack_plot.png`
+1. Run `git-of-theseus-survival-plot survival.json` which will write to `survival_plot.png` (see `python survival_plot.py --help` for some options)
+
+If you want to plot multiple repositories, have to run `git-of-theseus-analyze` separately for each project and store the data in separate directories using the `--outdir` flag. Then you can run `git-of-theseus-survival-plot <foo/survival.json> <bar/survival.json>` (optionally with the `--exp-fit` flag to fit an exponential decay)
 
 Help
 ----
@@ -51,7 +53,7 @@ Rails – stack plot:
 Plotting other stuff
 --------------------
 
-`analyze.py` will write `exts.json`, `cohorts.json` and `authors.json`. You can run `python stack_plot.py authors.json` to plot author statistics as well, or `python stack_plot.py exts.json` to plot file extension statistics. For author statistics, you might want to create a [.mailmap](https://git-scm.com/docs/git-check-mailmap) file to deduplicate authors.
+`git-of-theseus-analyze` will write `exts.json`, `cohorts.json` and `authors.json`. You can run `git-of-theseus-stack-plot authors.json` to plot author statistics as well, or `git-of-thesesus-stack-plot exts.json` to plot file extension statistics. For author statistics, you might want to create a [.mailmap](https://git-scm.com/docs/git-check-mailmap) file to deduplicate authors.
 
 Other stuff
 -----------

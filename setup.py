@@ -1,8 +1,8 @@
 from distutils.core import setup
 
-setup(name='Git of Theseus',
+setup(name='git-of-theseus',
       version='0.0.1',
-      description='Plot stats on Git repositries',
+      description='Plot stats on Git repositories',
       author='Erik Bernhardsson',
       author_email='mail@erikbern.com',
       url='https://github.com/erikbern/git-of-theseus',
