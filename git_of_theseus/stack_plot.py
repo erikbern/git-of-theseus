@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright 2016 Erik Bernhardsson
-#
+#k*
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,23 +17,40 @@
 import matplotlib
 matplotlib.use('Agg')
 
-import sys, seaborn, dateutil.parser, numpy, json, argparse
-
+import argparse, colorsys, dateutil.parser, json, numpy, seaborn, sys
 from matplotlib import pyplot
+
+
+def generate_n_colors(n, k=7):
+    j = int((n+k-1) / k)
+    for i in range(n):
+        print(int(i/k), '+', j*(i%k))
+    return [colorsys.hsv_to_rgb(1.0 * (int(i/k) + j*(i%k)) / (j*k), 1.0, 1.0) for i in range(n)]
+
 
 def stack_plot():
     parser = argparse.ArgumentParser(description='Plot stack plot')
     parser.add_argument('--display', action='store_true', help='Display plot')
     parser.add_argument('--outfile', default='stack_plot.png', help='Output file to store results (default: %(default)s)')
+    parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (will roll everything else into "other") (default: %(default)s)')
     parser.add_argument('inputs')
     args = parser.parse_args()
 
     data = json.load(open(args.inputs))
     y = numpy.array(data['y'])
+    if y.shape[0] > args.max_n:
+        js = sorted(range(len(data['labels'])), key=lambda j: max(y[j]), reverse=True)
+        other_sum = numpy.sum(y[j] for j in js[args.max_n:])
+        top_js = sorted(js[:args.max_n], key=lambda j: data['labels'][j])
+        y = numpy.array([y[j] for j in top_js] + [other_sum])
+        labels = [data['labels'][j] for j in top_js] + ['other']
+    else:
+        labels = data['labels']
     pyplot.figure(figsize=(13, 8))
     pyplot.stackplot([dateutil.parser.parse(t) for t in data['ts']],
                      numpy.array(y),
-                     labels=data['labels'])
+                     labels=labels,
+                     colors=generate_n_colors(len(labels)))
     pyplot.legend(loc=2)
     pyplot.ylabel('Lines of code')
     pyplot.savefig(args.outfile)
