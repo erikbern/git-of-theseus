@@ -39,3 +39,7 @@ def stack_plot():
     pyplot.savefig(args.outfile)
     if args.display:
         pyplot.show()
+
+
+if __name__ == '__main__':
+    stack_plot()

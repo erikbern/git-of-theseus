@@ -78,7 +78,7 @@ def analyze():
             n += 1
             _, ext = os.path.splitext(entry.path)
             curves_set.add(('ext', ext))
-            curves_set.add(('author', commit.author.email))
+            curves_set.add(('author', commit.author.name))
         entries_total += n
 
     def get_file_histogram(commit, path):
@@ -87,7 +87,7 @@ def analyze():
             for old_commit, lines in repo.blame(commit, path):
                 cohort = commit2cohort.get(old_commit.hexsha, "MISSING")
                 _, ext = os.path.splitext(path)
-                keys = [('cohort', cohort), ('ext', ext), ('author', commit.author.email)]
+                keys = [('cohort', cohort), ('ext', ext), ('author', commit.author.name)]
 
                 if old_commit.hexsha in commit2timestamp:
                     keys.append(('sha', old_commit.hexsha))
@@ -157,3 +157,7 @@ def analyze():
     f = open(os.path.join(args.outdir, 'survival.json'), 'w')
     json.dump(commit_history, f)
     f.close()
+
+
+if __name__ == '__main__':
+    analyze()
