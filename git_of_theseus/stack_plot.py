@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright 2016 Erik Bernhardsson
-#k*
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,15 +17,19 @@
 import matplotlib
 matplotlib.use('Agg')
 
-import argparse, colorsys, dateutil.parser, json, numpy, seaborn, sys
+import argparse, dateutil.parser, itertools, json, numpy, seaborn, sys
 from matplotlib import pyplot
 
 
-def generate_n_colors(n, k=7):
-    j = int((n+k-1) / k)
-    for i in range(n):
-        print(int(i/k), '+', j*(i%k))
-    return [colorsys.hsv_to_rgb(1.0 * (int(i/k) + j*(i%k)) / (j*k), 1.0, 1.0) for i in range(n)]
+def generate_n_colors(n):
+    vs = numpy.linspace(0.4, 1.0, 7)
+    colors = [(.9, .4, .4)]
+    def euclidean(a, b):
+        return sum((x-y)**2 for x, y in zip(a, b))
+    while len(colors) < n:
+        new_color = max(itertools.product(vs, vs, vs), key=lambda a: min(euclidean(a, b) for b in colors))
+        colors.append(new_color)
+    return colors
 
 
 def stack_plot():
