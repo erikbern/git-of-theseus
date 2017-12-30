@@ -12,7 +12,7 @@ Run `pip install git-of-theseus`
 Running
 -------
 
-First, you need to run `git-of-theseus-analyze <path to repo>` (see `python analyze.py --help` for a bunch of config). This will analyze a repository and might take quite some time.
+First, you need to run `git-of-theseus-analyze <path to repo>` (see `git-of-theseus-analyze --help` for a bunch of config). This will analyze a repository and might take quite some time.
 
 After that, you can generate plots! Here are some ways you can do that:
 
@@ -33,7 +33,7 @@ Survival of a line of code in a set of interesting repos:
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-projects-survival.png)
 
-This curve is produced by the `survival_plot.py` script and shows the *percentage of lines in a commit that are still present after x years*. It aggregates it over all commits, no matter what point in time they were made. So for *x=0* it includes all commits, whereas for *x>0* not all commits are counted (because we would have to look into the future for some of them). The survival curves are estimated using [Kaplan-Meier](https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator).
+This curve is produced by the `git-of-theseus-survival-plot` script and shows the *percentage of lines in a commit that are still present after x years*. It aggregates it over all commits, no matter what point in time they were made. So for *x=0* it includes all commits, whereas for *x>0* not all commits are counted (because we would have to look into the future for some of them). The survival curves are estimated using [Kaplan-Meier](https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator).
 
 You can also add an exponential fit:
 
@@ -43,7 +43,7 @@ Linux – stack plot:
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-linux.png)
 
-This curve is produced by the `stack_plot.py` script and shows the total number of lines in a repo broken down into cohorts by the year the code was added.
+This curve is produced by the `git-of-theseus-stack-plot` script and shows the total number of lines in a repo broken down into cohorts by the year the code was added.
 
 Node – stack plot:
 
