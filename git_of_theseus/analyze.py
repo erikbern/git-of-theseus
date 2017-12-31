@@ -154,7 +154,9 @@ def analyze():
 
     def dump_json(output_fn, key_type, label_fmt=lambda x: x):
         key_items = sorted(k for t, k in curves_set if t == key_type)
-        f = open(os.path.join(args.outdir, output_fn), 'w')
+        fn = os.path.join(args.outdir, output_fn)
+        print('Writing %s data to %s' % (key_type, fn))
+        f = open(fn, 'w')
         json.dump({'y': [curves[(key_type, key_item)] for key_item in key_items],
                    'ts': [t.isoformat() for t in ts],
                    'labels': [label_fmt(key_item) for key_item in key_items]
@@ -167,7 +169,9 @@ def analyze():
     dump_json('authors.json', 'author')
 
     # Dump survival data
-    f = open(os.path.join(args.outdir, 'survival.json'), 'w')
+    fn = os.path.join(args.outdir, 'survival.json')
+    f = open(fn, 'w')
+    print('Writing survival data to %s' % fn)
     json.dump(commit_history, f)
     f.close()
 

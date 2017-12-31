@@ -58,6 +58,7 @@ def stack_plot():
     pyplot.legend(loc=2)
     pyplot.ylabel('Lines of code')
     pyplot.savefig(args.outfile)
+    pyplot.tight_layout()
     if args.display:
         pyplot.show()
 

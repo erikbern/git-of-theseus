@@ -102,6 +102,7 @@ def survival_plot():
     pyplot.ylim([0, 100])
     pyplot.title('% of lines still present in code after n years')
     pyplot.legend()
+    pyplot.tight_layout()
     pyplot.savefig(args.outfile)
     if args.display:
         pyplot.show()
