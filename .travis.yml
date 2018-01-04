@@ -17,3 +17,4 @@ script:
   - git-of-theseus-stack-plot got/exts.json
   - git-of-theseus-stack-plot got/authors.json
   - git-of-theseus-survival-plot got/survival.json --exp-fit
+  - pip install git-of-theseus
