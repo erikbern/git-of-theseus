@@ -37,6 +37,7 @@ def stack_plot():
     parser.add_argument('--display', action='store_true', help='Display plot')
     parser.add_argument('--outfile', default='stack_plot.png', help='Output file to store results (default: %(default)s)')
     parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (will roll everything else into "other") (default: %(default)s)')
+    parser.add_argument('--normalize', action='store_true', help='Normalize the plot to 100%')
     parser.add_argument('inputs')
     args = parser.parse_args()
 
@@ -50,13 +51,19 @@ def stack_plot():
         labels = [data['labels'][j] for j in top_js] + ['other']
     else:
         labels = data['labels']
+    if args.normalize:
+        y = 100. * numpy.array(y) / numpy.sum(y, axis=0)
     pyplot.figure(figsize=(13, 8))
     pyplot.stackplot([dateutil.parser.parse(t) for t in data['ts']],
                      numpy.array(y),
                      labels=labels,
                      colors=generate_n_colors(len(labels)))
     pyplot.legend(loc=2)
-    pyplot.ylabel('Lines of code')
+    if args.normalize:
+        pyplot.ylabel('Share of lines of code (%)')
+        pyplot.ylim([0, 100])
+    else:
+        pyplot.ylabel('Lines of code')
     pyplot.savefig(args.outfile)
     pyplot.tight_layout()
     if args.display:

@@ -61,6 +61,10 @@ Plotting other stuff
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-kubernetes-authors.png)
 
+You can also normalize it to 100%. Here's author statistics for Git:
+
+![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-git-authors-normalized.png)
+
 Other stuff
 -----------
 
