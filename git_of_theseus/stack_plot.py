@@ -37,7 +37,7 @@ def stack_plot():
     parser.add_argument('--display', action='store_true', help='Display plot')
     parser.add_argument('--outfile', default='stack_plot.png', help='Output file to store results (default: %(default)s)')
     parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (will roll everything else into "other") (default: %(default)s)')
-    parser.add_argument('--normalize', action='store_true', help='Normalize the plot to 100%')
+    parser.add_argument('--normalize', action='store_true', help='Normalize the plot to 100%%')
     parser.add_argument('inputs')
     args = parser.parse_args()
 

@@ -18,4 +18,7 @@ script:
   - git-of-theseus-stack-plot got/exts.json
   - git-of-theseus-stack-plot got/authors.json
   - git-of-theseus-survival-plot got/survival.json --exp-fit
+  - git-of-theseus-analyze --help
+  - git-of-theseus-stack-plot --help
+  - git-of-theseus-survival-plot --help
   - pip install git-of-theseus
