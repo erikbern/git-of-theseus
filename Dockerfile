@@ -4,7 +4,7 @@ MAINTAINER Jim DeLois <delois@adobe.com>
 COPY ./container/ /
 COPY ./ /got/
 
-RUN pip install -r /got/requirements.txt && \
+RUN pip install -e /got && \
     apt-get update -q && \
     apt-get install -yqq git
 
