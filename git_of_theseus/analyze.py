@@ -49,6 +49,7 @@ def analyze():
         cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(args.cohortfm)
         commit2cohort[commit.hexsha] = cohort
         curves_set.add(('cohort', cohort))
+        curves_set.add(('author', commit.author.name))
         if len(commit.parents) == 1:
             code_commits.append(commit)
             last_date = commit.committed_date
@@ -91,7 +92,6 @@ def analyze():
             n += 1
             _, ext = os.path.splitext(entry.path)
             curves_set.add(('ext', ext))
-            curves_set.add(('author', commit.author.name))
         entries_total += n
 
     def get_file_histogram(commit, path):
@@ -150,7 +150,6 @@ def analyze():
 
         for key in curves_set:
             curves.setdefault(key, []).append(histogram.get(key, 0))
-
 
     def dump_json(output_fn, key_type, label_fmt=lambda x: x):
         key_items = sorted(k for t, k in curves_set if t == key_type)
