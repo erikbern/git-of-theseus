@@ -17,10 +17,15 @@
 from __future__ import print_function
 import argparse, git, datetime, numpy, pygments.lexers, traceback, time, os, fnmatch, json, progressbar
 
+# Some filetypes in Pygments are not necessarily computer code, but configuration/documentation. Let's not include those.
+IGNORE_PYGMENTS_FILETYPES = ['*.json', '*.md', '*.ps', '*.eps', '*.txt', '*.xml', '*.xsl', '*.rss', '*.xslt', '*.xsd', '*.wsdl', '*.wsf', '*.yaml', '*.yml']
+
+
 def analyze():
     default_filetypes = set()
     for _, _, filetypes, _ in pygments.lexers.get_all_lexers():
         default_filetypes.update(filetypes)
+    default_filetypes.difference_update(IGNORE_PYGMENTS_FILETYPES)
 
     parser = argparse.ArgumentParser(description='Analyze git repo')
     parser.add_argument('--cohortfm', default='%Y', help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
