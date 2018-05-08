@@ -48,30 +48,30 @@ def analyze():
         os.makedirs(args.outdir)
 
     print('Listing all commits')
-    bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
-    for i, commit in enumerate(repo.iter_commits(args.branch)):
-        bar.update(i)
-        cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(args.cohortfm)
-        commit2cohort[commit.hexsha] = cohort
-        curves_set.add(('cohort', cohort))
-        curves_set.add(('author', commit.author.name))
-        if len(commit.parents) == 1:
-            code_commits.append(commit)
-            last_date = commit.committed_date
-            commit2timestamp[commit.hexsha] = commit.committed_date
+    with progressbar.ProgressBar(max_value=progressbar.UnknownLength) as bar:
+        for i, commit in enumerate(repo.iter_commits(args.branch)):
+            bar.update(i)
+            cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(args.cohortfm)
+            commit2cohort[commit.hexsha] = cohort
+            curves_set.add(('cohort', cohort))
+            curves_set.add(('author', commit.author.name))
+            if len(commit.parents) == 1:
+                code_commits.append(commit)
+                last_date = commit.committed_date
+                commit2timestamp[commit.hexsha] = commit.committed_date
 
     print('Backtracking the master branch')
-    bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
-    i, commit = 0, repo.head.commit
-    last_date = None
-    while True:
-        bar.update(i)
-        if not commit.parents:
-            break
-        if last_date is None or commit.committed_date < last_date - args.interval:
-            master_commits.append(commit)
-            last_date = commit.committed_date
-        i, commit = i+1, commit.parents[0]
+    with progressbar.ProgressBar(max_value=progressbar.UnknownLength) as bar:
+        i, commit = 0, repo.head.commit
+        last_date = None
+        while True:
+            bar.update(i)
+            if not commit.parents:
+                break
+            if last_date is None or commit.committed_date < last_date - args.interval:
+                master_commits.append(commit)
+                last_date = commit.committed_date
+            i, commit = i+1, commit.parents[0]
 
     ok_entry_paths = {}
     def entry_path_ok(path):
@@ -89,15 +89,15 @@ def analyze():
 
     print('Counting total entries to analyze + caching filenames')
     entries_total = 0
-    bar = progressbar.ProgressBar(max_value=len(master_commits))
-    for i, commit in enumerate(reversed(master_commits)):
-        bar.update(i)
-        n = 0
-        for entry in get_entries(commit):
-            n += 1
-            _, ext = os.path.splitext(entry.path)
-            curves_set.add(('ext', ext))
-        entries_total += n
+    with progressbar.ProgressBar(max_value=len(master_commits)) as bar:
+        for i, commit in enumerate(reversed(master_commits)):
+            bar.update(i)
+            n = 0
+            for entry in get_entries(commit):
+                n += 1
+                _, ext = os.path.splitext(entry.path)
+                curves_set.add(('ext', ext))
+            entries_total += n
 
     def get_file_histogram(commit, path):
         h = {}
@@ -125,36 +125,36 @@ def analyze():
     commit_history = {}
 
     print('Analyzing commit history')
-    bar = progressbar.ProgressBar(max_value=entries_total, widget_kwargs=dict(samples=10000))
-    entries_processed = 0
-    for commit in reversed(master_commits):
-        t = datetime.datetime.utcfromtimestamp(commit.committed_date)
-        ts.append(t)
-        changed_files = set()
-        for diff in commit.diff(last_commit):
-            if diff.a_blob:
-                changed_files.add(diff.a_blob.path)
-            if diff.b_blob:
-                changed_files.add(diff.b_blob.path)
-        last_commit = commit
+    with progressbar.ProgressBar(max_value=entries_total, widget_kwargs=dict(samples=10000)) as bar:
+        entries_processed = 0
+        for commit in reversed(master_commits):
+            t = datetime.datetime.utcfromtimestamp(commit.committed_date)
+            ts.append(t)
+            changed_files = set()
+            for diff in commit.diff(last_commit):
+                if diff.a_blob:
+                    changed_files.add(diff.a_blob.path)
+                if diff.b_blob:
+                    changed_files.add(diff.b_blob.path)
+            last_commit = commit
 
-        histogram = {}
-        entries = get_entries(commit)
-        for entry in entries:
-            bar.update(entries_processed)
-            entries_processed += 1
-            if entry.path in changed_files or entry.path not in file_histograms:
-                file_histograms[entry.path] = get_file_histogram(commit, entry.path)
-            for key, count in file_histograms[entry.path].items():
-                histogram[key] = histogram.get(key, 0) + count
+            histogram = {}
+            entries = get_entries(commit)
+            for entry in entries:
+                bar.update(entries_processed)
+                entries_processed += 1
+                if entry.path in changed_files or entry.path not in file_histograms:
+                    file_histograms[entry.path] = get_file_histogram(commit, entry.path)
+                for key, count in file_histograms[entry.path].items():
+                    histogram[key] = histogram.get(key, 0) + count
 
-        for key, count in histogram.items():
-            key_type, key_item = key
-            if key_type == 'sha':
-                commit_history.setdefault(key_item, []).append((commit.committed_date, count))
+            for key, count in histogram.items():
+                key_type, key_item = key
+                if key_type == 'sha':
+                    commit_history.setdefault(key_item, []).append((commit.committed_date, count))
 
-        for key in curves_set:
-            curves.setdefault(key, []).append(histogram.get(key, 0))
+            for key in curves_set:
+                curves.setdefault(key, []).append(histogram.get(key, 0))
 
     def dump_json(output_fn, key_type, label_fmt=lambda x: x):
         key_items = sorted(k for t, k in curves_set if t == key_type)
