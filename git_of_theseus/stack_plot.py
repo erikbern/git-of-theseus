@@ -32,45 +32,52 @@ def generate_n_colors(n):
     return colors
 
 
-def stack_plot():
+def stack_plot(display=None, outfile=None, max_n=None, normalize=None, dont_stack=None, inputs=None):
     parser = argparse.ArgumentParser(description='Plot stack plot')
     parser.add_argument('--display', action='store_true', help='Display plot')
-    parser.add_argument('--outfile', default='stack_plot.png', help='Output file to store results (default: %(default)s)')
+    parser.add_argument('--outfile', default='stack_plot.png', type=str, help='Output file to store results (default: %(default)s)')
     parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (will roll everything else into "other") (default: %(default)s)')
     parser.add_argument('--normalize', action='store_true', help='Normalize the plot to 100%%')
     parser.add_argument('--dont-stack', action='store_true', help='Don\'t stack plot')
-    parser.add_argument('inputs')
+    parser.add_argument('inputs', nargs=1)
     args = parser.parse_args()
 
-    data = json.load(open(args.inputs))
+    display = display if display is not None else args.display
+    outfile = outfile or args.outfile
+    max_n = max_n or args.max_n
+    normalize = normalize if normalize is not None else args.normalize
+    dont_stack = dont_stack if dont_stack is not None else args.dont_stack
+    inputs = inputs or args.inputs
+
+    data = json.load(open(input))  # TODO do we support multiple arguments here?
     y = numpy.array(data['y'])
-    if y.shape[0] > args.max_n:
+    if y.shape[0] > max_n:
         js = sorted(range(len(data['labels'])), key=lambda j: max(y[j]), reverse=True)
-        other_sum = numpy.sum(y[j] for j in js[args.max_n:])
-        top_js = sorted(js[:args.max_n], key=lambda j: data['labels'][j])
+        other_sum = numpy.sum(y[j] for j in js[max_n:])
+        top_js = sorted(js[:max_n], key=lambda j: data['labels'][j])
         y = numpy.array([y[j] for j in top_js] + [other_sum])
         labels = [data['labels'][j] for j in top_js] + ['other']
     else:
         labels = data['labels']
-    if args.normalize:
+    if normalize:
         y = 100. * numpy.array(y) / numpy.sum(y, axis=0)
     pyplot.figure(figsize=(13, 8))
     ts = [dateutil.parser.parse(t) for t in data['ts']]
     colors = generate_n_colors(len(labels))
-    if args.dont_stack:
+    if dont_stack:
         for color, label, series in zip(colors, labels, y):
             pyplot.plot(ts, series, color=color, label=label, linewidth=2)
     else:
         pyplot.stackplot(ts, numpy.array(y), labels=labels, colors=colors)
     pyplot.legend(loc=2)
-    if args.normalize:
+    if normalize:
         pyplot.ylabel('Share of lines of code (%)')
         pyplot.ylim([0, 100])
     else:
         pyplot.ylabel('Lines of code')
-    pyplot.savefig(args.outfile)
+    pyplot.savefig(outfile)
     pyplot.tight_layout()
-    if args.display:
+    if display:
         pyplot.show()
 
 

@@ -21,20 +21,26 @@ import sys, seaborn, dateutil.parser, numpy, json, collections, math, scipy.opti
 
 from matplotlib import pyplot
 
-def survival_plot():
+def survival_plot(exp_fit=None, display=None, outfile=None, years=None, inputs=None):
     parser = argparse.ArgumentParser(description='Plot survival plot')
     parser.add_argument('--exp-fit', action='store_true', help='Plot exponential fit')
     parser.add_argument('--display', action='store_true', help='Display plot')
-    parser.add_argument('--outfile', default='survival_plot.png', help='Output file to store results (default: %(default)s)')
+    parser.add_argument('--outfile', default='survival_plot.png', type=str, help='Output file to store results (default: %(default)s)')
     parser.add_argument('--years', type=float, default=5, help='Number of years on x axis (default: %(default)s)')
     parser.add_argument('inputs', nargs='*')
     args = parser.parse_args()
+
+    exp_fit = exp_fit if exp_fit is not None else args.exp_fit
+    display = display if display is not None else args.display
+    outfile = outfile or args.outfile
+    years = years or args.years
+    inputs = inputs if inputs is not None else args.inputs
 
     all_deltas = []
     YEAR = 365.25 * 24 * 60 * 60
     pyplot.figure(figsize=(13, 8))
 
-    for fn in args.inputs:
+    for fn in inputs:
         print('reading %s' % fn)
         commit_history = json.load(open(fn))
 
@@ -67,7 +73,7 @@ def survival_plot():
                 break
 
         print('plotting...')
-        if args.exp_fit:
+        if exp_fit:
             pyplot.plot(xs, ys, color='darkgray')
         else:
             parts = os.path.split(fn)
@@ -89,22 +95,22 @@ def survival_plot():
         print(k, loss)
         return loss
 
-    if args.exp_fit:
+    if exp_fit:
         print('fitting exponential function')
         k = scipy.optimize.fmin(fit, 0.5, maxiter=50)[0]
-        ts = numpy.linspace(0, args.years, 1000)
+        ts = numpy.linspace(0, years, 1000)
         ys = [100. * math.exp(-k * t) for t in ts]
         pyplot.plot(ts, ys, color='red', label='Exponential fit, half-life = %.2f years' % (math.log(2) / k))
 
     pyplot.xlabel('Years')
     pyplot.ylabel('%')
-    pyplot.xlim([0, args.years])
+    pyplot.xlim([0, years])
     pyplot.ylim([0, 100])
     pyplot.title('% of lines still present in code after n years')
     pyplot.legend()
     pyplot.tight_layout()
-    pyplot.savefig(args.outfile)
-    if args.display:
+    pyplot.savefig(outfile)
+    if display:
         pyplot.show()
 
 
