@@ -49,7 +49,7 @@ def stack_plot(display=None, outfile=None, max_n=None, normalize=None, dont_stac
     dont_stack = dont_stack if dont_stack is not None else args.dont_stack
     inputs = inputs or args.inputs
 
-    data = json.load(open(input))  # TODO do we support multiple arguments here?
+    data = json.load(open(inputs))  # TODO do we support multiple arguments here?
     y = numpy.array(data['y'])
     if y.shape[0] > max_n:
         js = sorted(range(len(data['labels'])), key=lambda j: max(y[j]), reverse=True)
