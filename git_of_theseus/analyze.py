@@ -83,12 +83,13 @@ def analyze(cohortfm=None, interval=None, ignore=None, only=None, outdir=None, b
             i, commit = i+1, commit.parents[0]
 
     ok_entry_paths = {}
+
     def entry_path_ok(path):
         # All this matching is slow so let's cache it
         if path not in ok_entry_paths:
             ok_entry_paths[path] = (
-                (all_filetypes or any(fnmatch.fnmatch(os.path.split(path)[-1], filetype) for filetype in default_filetypes))
-                and all([fnmatch.fnmatch(path, pattern) for pattern in only])
+                (all_filetypes or any(fnmatch.fnmatch(os.path.split(path)[-1], filetype) for filetype in default_filetypes))\
+                and all([fnmatch.fnmatch(path, pattern) for pattern in only])\
                 and not any([fnmatch.fnmatch(path, pattern) for pattern in ignore]))
         return ok_entry_paths[path]
 
