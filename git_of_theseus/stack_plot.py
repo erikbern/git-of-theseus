@@ -66,7 +66,7 @@ def stack_plot(input_fn, display=False, outfile='stack_plot.png', max_n=20, norm
         pyplot.show()
 
 
-if __name__ == '__main__':
+def stack_plot_cmdline():
     parser = argparse.ArgumentParser(description='Plot stack plot')
     parser.add_argument('--display', action='store_true', help='Display plot')
     parser.add_argument('--outfile', default='stack_plot.png', type=str, help='Output file to store results (default: %(default)s)')
@@ -77,3 +77,7 @@ if __name__ == '__main__':
     kwargs = vars(parser.parse_args())
 
     stack_plot(**kwargs)
+
+
+if __name__ == '__main__':
+    stack_plot_cmdline()

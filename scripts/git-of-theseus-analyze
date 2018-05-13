@@ -1,3 +1,3 @@
 #!/usr/bin/python
-from git_of_theseus import analyze
-analyze()
+from git_of_theseus import analyze_cmdline
+analyze_cmdline()

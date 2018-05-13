@@ -101,7 +101,7 @@ def survival_plot(input_fns, exp_fit=False, display=False, outfile='survival_plo
         pyplot.show()
 
 
-if __name__ == '__main__':
+def survival_plot_cmdline():
     parser = argparse.ArgumentParser(description='Plot survival plot')
     parser.add_argument('--exp-fit', action='store_true', help='Plot exponential fit')
     parser.add_argument('--display', action='store_true', help='Display plot')
@@ -111,3 +111,7 @@ if __name__ == '__main__':
     kwargs = vars(parser.parse_args())
 
     survival_plot(**kwargs)
+
+
+if __name__ == '__main__':
+    survival_plot_cmdline()

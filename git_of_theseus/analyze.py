@@ -170,7 +170,7 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
     f.close()
 
 
-if __name__ == '__main__':
+def analyze_cmdline():
     parser = argparse.ArgumentParser(description='Analyze git repo')
     parser.add_argument('--cohortfm', default='%Y', type=str, help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
     parser.add_argument('--interval', default=7*24*60*60, type=int, help='Min difference between commits to analyze (default: %(default)s)')
@@ -183,3 +183,7 @@ if __name__ == '__main__':
     kwargs = vars(parser.parse_args())
 
     analyze(**kwargs)
+
+
+if __name__ == '__main__':
+    analyze_cmdline()
