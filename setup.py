@@ -14,7 +14,6 @@ setup(name='git-of-theseus',
           'progressbar2',
           'pygments',
           'matplotlib',
-          'seaborn',
       ],
       entry_points = {
         'console_scripts': [

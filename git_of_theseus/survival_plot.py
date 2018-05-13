@@ -17,7 +17,7 @@
 import matplotlib
 matplotlib.use('Agg')
 
-import sys, seaborn, dateutil.parser, numpy, json, collections, math, scipy.optimize, argparse, os
+import sys, dateutil.parser, numpy, json, collections, math, scipy.optimize, argparse, os
 
 from matplotlib import pyplot
 
