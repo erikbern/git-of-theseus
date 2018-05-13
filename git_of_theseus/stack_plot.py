@@ -32,7 +32,7 @@ def generate_n_colors(n):
     return colors
 
 
-def stack_plot(display=None, outfile=None, max_n=None, normalize=None, dont_stack=None, inputs=None):
+def stack_plot(display, outfile, max_n, normalize, dont_stack, inputs):
     data = json.load(open(inputs[0]))  # TODO do we support multiple arguments here?
     y = numpy.array(data['y'])
     if y.shape[0] > max_n:

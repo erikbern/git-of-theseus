@@ -21,7 +21,7 @@ import sys, dateutil.parser, numpy, json, collections, math, scipy.optimize, arg
 
 from matplotlib import pyplot
 
-def survival_plot(exp_fit=None, display=None, outfile=None, years=None, inputs=None):
+def survival_plot(exp_fit, display, outfile, years, inputs):
     all_deltas = []
     YEAR = 365.25 * 24 * 60 * 60
     pyplot.figure(figsize=(13, 8))
