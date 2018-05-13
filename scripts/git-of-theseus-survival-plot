@@ -1,3 +1,0 @@
-#!/usr/bin/python
-from git_of_theseus import survival_plot
-survival_plot()
