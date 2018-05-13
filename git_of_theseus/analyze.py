@@ -21,22 +21,31 @@ import argparse, git, datetime, numpy, pygments.lexers, traceback, time, os, fnm
 IGNORE_PYGMENTS_FILETYPES = ['*.json', '*.md', '*.ps', '*.eps', '*.txt', '*.xml', '*.xsl', '*.rss', '*.xslt', '*.xsd', '*.wsdl', '*.wsf', '*.yaml', '*.yml']
 
 
-def analyze():
+def analyze(cohortfm=None, interval=None, ignore=None, only=None, outdir=None, branch=None, all_filetypes=None, repos=None):
     default_filetypes = set()
     for _, _, filetypes, _ in pygments.lexers.get_all_lexers():
         default_filetypes.update(filetypes)
     default_filetypes.difference_update(IGNORE_PYGMENTS_FILETYPES)
 
     parser = argparse.ArgumentParser(description='Analyze git repo')
-    parser.add_argument('--cohortfm', default='%Y', help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
+    parser.add_argument('--cohortfm', default='%Y', type=str, help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
     parser.add_argument('--interval', default=7*24*60*60, type=int, help='Min difference between commits to analyze (default: %(default)s)')
     parser.add_argument('--ignore', default=[], action='append', help='File patterns that should be ignored (can provide multiple, will each subtract independently)')
     parser.add_argument('--only', default=[], action='append', help='File patterns that have to match (can provide multiple, will all have to match)')
     parser.add_argument('--outdir', default='.', help='Output directory to store results (default: %(default)s)')
-    parser.add_argument('--branch', default='master', help='Branch to track (default: %(default)s)')
+    parser.add_argument('--branch', default='master', type=str, help='Branch to track (default: %(default)s)')
     parser.add_argument('--all-filetypes', action='store_true', help='Include all files (if not set then will only analyze %s' % ','.join(default_filetypes))
     parser.add_argument('repos', nargs=1)
     args = parser.parse_args()
+
+    cohortfm = cohortfm or args.cohortfm
+    interval = interval or args.interval
+    ignore = ignore if ignore is not None else args.ignore
+    only = only if only is not None else args.only
+    outdir = outdir or args.outdir
+    branch = branch or args.branch
+    all_filetypes = all_filetypes if all_filetypes is not None else args.all_filetypes
+    repos = repos or args.repos
 
     repo = git.Repo(args.repos[0])
     commit2cohort = {}
@@ -44,14 +53,14 @@ def analyze():
     master_commits = []
     commit2timestamp = {}
     curves_set = set()
-    if not os.path.exists(args.outdir):
-        os.makedirs(args.outdir)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
 
     print('Listing all commits')
     with progressbar.ProgressBar(max_value=progressbar.UnknownLength) as bar:
-        for i, commit in enumerate(repo.iter_commits(args.branch)):
+        for i, commit in enumerate(repo.iter_commits(branch)):
             bar.update(i)
-            cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(args.cohortfm)
+            cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(cohortfm)
             commit2cohort[commit.hexsha] = cohort
             curves_set.add(('cohort', cohort))
             curves_set.add(('author', commit.author.name))
@@ -68,20 +77,20 @@ def analyze():
             bar.update(i)
             if not commit.parents:
                 break
-            if last_date is None or commit.committed_date < last_date - args.interval:
+            if last_date is None or commit.committed_date < last_date - interval:
                 master_commits.append(commit)
                 last_date = commit.committed_date
             i, commit = i+1, commit.parents[0]
 
     ok_entry_paths = {}
-    
+
     def entry_path_ok(path):
         # All this matching is slow so let's cache it
         if path not in ok_entry_paths:
             ok_entry_paths[path] = (
-                (args.all_filetypes or any(fnmatch.fnmatch(os.path.split(path)[-1], filetype) for filetype in default_filetypes))\
-                and all([fnmatch.fnmatch(path, pattern) for pattern in args.only])\
-                and not any([fnmatch.fnmatch(path, pattern) for pattern in args.ignore]))
+                (all_filetypes or any(fnmatch.fnmatch(os.path.split(path)[-1], filetype) for filetype in default_filetypes))\
+                and all([fnmatch.fnmatch(path, pattern) for pattern in only])\
+                and not any([fnmatch.fnmatch(path, pattern) for pattern in ignore]))
         return ok_entry_paths[path]
 
     def get_entries(commit):
@@ -159,7 +168,7 @@ def analyze():
 
     def dump_json(output_fn, key_type, label_fmt=lambda x: x):
         key_items = sorted(k for t, k in curves_set if t == key_type)
-        fn = os.path.join(args.outdir, output_fn)
+        fn = os.path.join(outdir, output_fn)
         print('Writing %s data to %s' % (key_type, fn))
         f = open(fn, 'w')
         json.dump({'y': [curves[(key_type, key_item)] for key_item in key_items],
@@ -174,7 +183,7 @@ def analyze():
     dump_json('authors.json', 'author')
 
     # Dump survival data
-    fn = os.path.join(args.outdir, 'survival.json')
+    fn = os.path.join(outdir, 'survival.json')
     f = open(fn, 'w')
     print('Writing survival data to %s' % fn)
     json.dump(commit_history, f)
