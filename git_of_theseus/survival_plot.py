@@ -22,20 +22,6 @@ import sys, dateutil.parser, numpy, json, collections, math, scipy.optimize, arg
 from matplotlib import pyplot
 
 def survival_plot(exp_fit=None, display=None, outfile=None, years=None, inputs=None):
-    parser = argparse.ArgumentParser(description='Plot survival plot')
-    parser.add_argument('--exp-fit', action='store_true', help='Plot exponential fit')
-    parser.add_argument('--display', action='store_true', help='Display plot')
-    parser.add_argument('--outfile', default='survival_plot.png', type=str, help='Output file to store results (default: %(default)s)')
-    parser.add_argument('--years', type=float, default=5, help='Number of years on x axis (default: %(default)s)')
-    parser.add_argument('inputs', nargs='*')
-    args = parser.parse_args()
-
-    exp_fit = exp_fit if exp_fit is not None else args.exp_fit
-    display = display if display is not None else args.display
-    outfile = outfile or args.outfile
-    years = years or args.years
-    inputs = inputs if inputs is not None else args.inputs
-
     all_deltas = []
     YEAR = 365.25 * 24 * 60 * 60
     pyplot.figure(figsize=(13, 8))
@@ -116,4 +102,12 @@ def survival_plot(exp_fit=None, display=None, outfile=None, years=None, inputs=N
 
 
 if __name__ == '__main__':
-    survival_plot()
+    parser = argparse.ArgumentParser(description='Plot survival plot')
+    parser.add_argument('--exp-fit', action='store_true', help='Plot exponential fit')
+    parser.add_argument('--display', action='store_true', help='Display plot')
+    parser.add_argument('--outfile', default='survival_plot.png', type=str, help='Output file to store results (default: %(default)s)')
+    parser.add_argument('--years', type=float, default=5, help='Number of years on x axis (default: %(default)s)')
+    parser.add_argument('inputs', nargs='*')
+    kwargs = vars(parser.parse_args())
+
+    survival_plot(**kwargs)

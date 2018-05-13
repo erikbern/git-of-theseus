@@ -20,34 +20,14 @@ import argparse, git, datetime, numpy, pygments.lexers, traceback, time, os, fnm
 # Some filetypes in Pygments are not necessarily computer code, but configuration/documentation. Let's not include those.
 IGNORE_PYGMENTS_FILETYPES = ['*.json', '*.md', '*.ps', '*.eps', '*.txt', '*.xml', '*.xsl', '*.rss', '*.xslt', '*.xsd', '*.wsdl', '*.wsf', '*.yaml', '*.yml']
 
+default_filetypes = set()
+for _, _, filetypes, _ in pygments.lexers.get_all_lexers():
+    default_filetypes.update(filetypes)
+default_filetypes.difference_update(IGNORE_PYGMENTS_FILETYPES)
 
-def analyze(cohortfm=None, interval=None, ignore=None, only=None, outdir=None, branch=None, all_filetypes=None, repos=None):
-    default_filetypes = set()
-    for _, _, filetypes, _ in pygments.lexers.get_all_lexers():
-        default_filetypes.update(filetypes)
-    default_filetypes.difference_update(IGNORE_PYGMENTS_FILETYPES)
 
-    parser = argparse.ArgumentParser(description='Analyze git repo')
-    parser.add_argument('--cohortfm', default='%Y', type=str, help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
-    parser.add_argument('--interval', default=7*24*60*60, type=int, help='Min difference between commits to analyze (default: %(default)s)')
-    parser.add_argument('--ignore', default=[], action='append', help='File patterns that should be ignored (can provide multiple, will each subtract independently)')
-    parser.add_argument('--only', default=[], action='append', help='File patterns that have to match (can provide multiple, will all have to match)')
-    parser.add_argument('--outdir', default='.', help='Output directory to store results (default: %(default)s)')
-    parser.add_argument('--branch', default='master', type=str, help='Branch to track (default: %(default)s)')
-    parser.add_argument('--all-filetypes', action='store_true', help='Include all files (if not set then will only analyze %s' % ','.join(default_filetypes))
-    parser.add_argument('repos', nargs=1)
-    args = parser.parse_args()
-
-    cohortfm = cohortfm or args.cohortfm
-    interval = interval or args.interval
-    ignore = ignore if ignore is not None else args.ignore
-    only = only if only is not None else args.only
-    outdir = outdir or args.outdir
-    branch = branch or args.branch
-    all_filetypes = all_filetypes if all_filetypes is not None else args.all_filetypes
-    repos = repos or args.repos
-
-    repo = git.Repo(args.repos[0])
+def analyze(cohortfm=None, interval=None, ignore=None, only=None, outdir=None, branch=None, all_filetypes=None, repo=None):
+    repo = git.Repo(repo)
     commit2cohort = {}
     code_commits = [] # only stores a subset
     master_commits = []
@@ -191,4 +171,15 @@ def analyze(cohortfm=None, interval=None, ignore=None, only=None, outdir=None, b
 
 
 if __name__ == '__main__':
-    analyze()
+    parser = argparse.ArgumentParser(description='Analyze git repo')
+    parser.add_argument('--cohortfm', default='%Y', type=str, help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
+    parser.add_argument('--interval', default=7*24*60*60, type=int, help='Min difference between commits to analyze (default: %(default)s)')
+    parser.add_argument('--ignore', default=[], action='append', help='File patterns that should be ignored (can provide multiple, will each subtract independently)')
+    parser.add_argument('--only', default=[], action='append', help='File patterns that have to match (can provide multiple, will all have to match)')
+    parser.add_argument('--outdir', default='.', help='Output directory to store results (default: %(default)s)')
+    parser.add_argument('--branch', default='master', type=str, help='Branch to track (default: %(default)s)')
+    parser.add_argument('--all-filetypes', action='store_true', help='Include all files (if not set then will only analyze %s' % ','.join(default_filetypes))
+    parser.add_argument('repo')
+    kwargs = vars(parser.parse_args())
+
+    analyze(**kwargs)

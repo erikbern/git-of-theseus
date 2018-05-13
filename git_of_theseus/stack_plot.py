@@ -33,22 +33,6 @@ def generate_n_colors(n):
 
 
 def stack_plot(display=None, outfile=None, max_n=None, normalize=None, dont_stack=None, inputs=None):
-    parser = argparse.ArgumentParser(description='Plot stack plot')
-    parser.add_argument('--display', action='store_true', help='Display plot')
-    parser.add_argument('--outfile', default='stack_plot.png', type=str, help='Output file to store results (default: %(default)s)')
-    parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (will roll everything else into "other") (default: %(default)s)')
-    parser.add_argument('--normalize', action='store_true', help='Normalize the plot to 100%%')
-    parser.add_argument('--dont-stack', action='store_true', help='Don\'t stack plot')
-    parser.add_argument('inputs', nargs=1)
-    args = parser.parse_args()
-
-    display = display if display is not None else args.display
-    outfile = outfile or args.outfile
-    max_n = max_n or args.max_n
-    normalize = normalize if normalize is not None else args.normalize
-    dont_stack = dont_stack if dont_stack is not None else args.dont_stack
-    inputs = inputs or args.inputs
-
     data = json.load(open(inputs[0]))  # TODO do we support multiple arguments here?
     y = numpy.array(data['y'])
     if y.shape[0] > max_n:
@@ -83,4 +67,13 @@ def stack_plot(display=None, outfile=None, max_n=None, normalize=None, dont_stac
 
 
 if __name__ == '__main__':
-    stack_plot()
+    parser = argparse.ArgumentParser(description='Plot stack plot')
+    parser.add_argument('--display', action='store_true', help='Display plot')
+    parser.add_argument('--outfile', default='stack_plot.png', type=str, help='Output file to store results (default: %(default)s)')
+    parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (will roll everything else into "other") (default: %(default)s)')
+    parser.add_argument('--normalize', action='store_true', help='Normalize the plot to 100%%')
+    parser.add_argument('--dont-stack', action='store_true', help='Don\'t stack plot')
+    parser.add_argument('inputs', nargs=1)
+    kwargs = vars(parser.parse_args())
+
+    stack_plot(**kwargs)
