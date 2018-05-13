@@ -17,7 +17,7 @@
 import matplotlib
 matplotlib.use('Agg')
 
-import sys, seaborn, dateutil.parser, numpy, json, collections, math, scipy.optimize, argparse, os
+import sys, dateutil.parser, numpy, json, collections, math, scipy.optimize, argparse, os
 
 from matplotlib import pyplot
 
@@ -39,6 +39,7 @@ def survival_plot(exp_fit=None, display=None, outfile=None, years=None, inputs=N
     all_deltas = []
     YEAR = 365.25 * 24 * 60 * 60
     pyplot.figure(figsize=(13, 8))
+    pyplot.style.use('ggplot')
 
     for fn in inputs:
         print('reading %s' % fn)

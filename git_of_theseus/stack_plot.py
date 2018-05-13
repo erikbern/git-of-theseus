@@ -17,7 +17,7 @@
 import matplotlib
 matplotlib.use('Agg')
 
-import argparse, dateutil.parser, itertools, json, numpy, seaborn, sys
+import argparse, dateutil.parser, itertools, json, numpy, sys
 from matplotlib import pyplot
 
 
@@ -62,6 +62,7 @@ def stack_plot(display=None, outfile=None, max_n=None, normalize=None, dont_stac
     if normalize:
         y = 100. * numpy.array(y) / numpy.sum(y, axis=0)
     pyplot.figure(figsize=(13, 8))
+    pyplot.style.use('ggplot')
     ts = [dateutil.parser.parse(t) for t in data['ts']]
     colors = generate_n_colors(len(labels))
     if dont_stack:
