@@ -26,7 +26,7 @@ for _, _, filetypes, _ in pygments.lexers.get_all_lexers():
 default_filetypes.difference_update(IGNORE_PYGMENTS_FILETYPES)
 
 
-def analyze(cohortfm, interval, ignore, only, outdir, branch, all_filetypes, repo):
+def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir='.', branch='master', all_filetypes=False):
     repo = git.Repo(repo)
     commit2cohort = {}
     code_commits = [] # only stores a subset

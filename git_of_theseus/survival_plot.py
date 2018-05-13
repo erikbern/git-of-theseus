@@ -21,13 +21,13 @@ import sys, dateutil.parser, numpy, json, collections, math, scipy.optimize, arg
 
 from matplotlib import pyplot
 
-def survival_plot(exp_fit, display, outfile, years, inputs):
+def survival_plot(input_fns, exp_fit=False, display=False, outfile='survival_plot', years=5):
     all_deltas = []
     YEAR = 365.25 * 24 * 60 * 60
     pyplot.figure(figsize=(13, 8))
     pyplot.style.use('ggplot')
 
-    for fn in inputs:
+    for fn in input_fns:
         print('reading %s' % fn)
         commit_history = json.load(open(fn))
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     parser.add_argument('--display', action='store_true', help='Display plot')
     parser.add_argument('--outfile', default='survival_plot.png', type=str, help='Output file to store results (default: %(default)s)')
     parser.add_argument('--years', type=float, default=5, help='Number of years on x axis (default: %(default)s)')
-    parser.add_argument('inputs', nargs='*')
+    parser.add_argument('input_fns', nargs='*')
     kwargs = vars(parser.parse_args())
 
     survival_plot(**kwargs)
