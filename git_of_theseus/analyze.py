@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from __future__ import print_function
-import argparse, git, datetime, numpy, pygments.lexers, traceback, time, os, fnmatch, json, progressbar
+import argparse, git, datetime, numpy, pygments.lexers, traceback, time, os, fnmatch, json, progressbar, sys
 
 # Some filetypes in Pygments are not necessarily computer code, but configuration/documentation. Let's not include those.
 IGNORE_PYGMENTS_FILETYPES = ['*.json', '*.md', '*.ps', '*.eps', '*.txt', '*.xml', '*.xsl', '*.rss', '*.xslt', '*.xsd', '*.wsdl', '*.wsf', '*.yaml', '*.yml']
@@ -25,7 +25,8 @@ for _, _, filetypes, _ in pygments.lexers.get_all_lexers():
     default_filetypes.update(filetypes)
 default_filetypes.difference_update(IGNORE_PYGMENTS_FILETYPES)
 
-widget_kwargs = dict(samples=10000, marker='\U0001f30a', right='\u26f5', left='\U0001f32c', markers=''.join(chr(0x1f311 + i) for i in range(8)))
+c = chr if sys.version_info[0] >= 3 else unichr
+widget_kwargs = dict(samples=10000, marker='\U0001f30a', right='\u26f5', left='\U0001f32c', markers=''.join(c(0x1f311 + i) for i in range(8)))
 
 
 def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir='.', branch='master', all_filetypes=False):
