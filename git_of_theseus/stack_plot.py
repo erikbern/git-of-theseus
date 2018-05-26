@@ -60,6 +60,7 @@ def stack_plot(input_fn, display=False, outfile='stack_plot.png', max_n=20, norm
         pyplot.ylim([0, 100])
     else:
         pyplot.ylabel('Lines of code')
+    print('Writing output to %s' % outfile)
     pyplot.savefig(outfile)
     pyplot.tight_layout()
     if display:
