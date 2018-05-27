@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from __future__ import print_function
-import argparse, git, datetime, numpy, pygments.lexers, traceback, time, os, fnmatch, json, progressbar
+import argparse, git, datetime, numpy, pygments.lexers, traceback, time, os, fnmatch, json, progressbar, sys
 
 # Some filetypes in Pygments are not necessarily computer code, but configuration/documentation. Let's not include those.
 IGNORE_PYGMENTS_FILETYPES = ['*.json', '*.md', '*.ps', '*.eps', '*.txt', '*.xml', '*.xsl', '*.rss', '*.xslt', '*.xsd', '*.wsdl', '*.wsf', '*.yaml', '*.yml']
@@ -24,6 +24,12 @@ default_filetypes = set()
 for _, _, filetypes, _ in pygments.lexers.get_all_lexers():
     default_filetypes.update(filetypes)
 default_filetypes.difference_update(IGNORE_PYGMENTS_FILETYPES)
+
+c = chr if sys.version_info[0] >= 3 else unichr
+widget_kwargs = dict(samples=10000)
+if sys.version_info[0] >= 3:
+    # Emojis!
+    widget_kwargs.update(dict(marker='\U0001f30a', right='\u26f5', left='\U0001f32c', markers=''.join(chr(0x1f311 + i) for i in range(8))))
 
 
 def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir='.', branch='master', all_filetypes=False):
@@ -37,7 +43,7 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
         os.makedirs(outdir)
 
     print('Listing all commits')
-    with progressbar.ProgressBar(max_value=progressbar.UnknownLength) as bar:
+    with progressbar.ProgressBar(max_value=progressbar.UnknownLength, widget_kwargs=widget_kwargs) as bar:
         for i, commit in enumerate(repo.iter_commits(branch)):
             bar.update(i)
             cohort = datetime.datetime.utcfromtimestamp(commit.committed_date).strftime(cohortfm)
@@ -50,7 +56,7 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
                 commit2timestamp[commit.hexsha] = commit.committed_date
 
     print('Backtracking the master branch')
-    with progressbar.ProgressBar(max_value=progressbar.UnknownLength) as bar:
+    with progressbar.ProgressBar(max_value=progressbar.UnknownLength, widget_kwargs=widget_kwargs) as bar:
         i, commit = 0, repo.head.commit
         last_date = None
         while True:
@@ -79,7 +85,7 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
 
     print('Counting total entries to analyze + caching filenames')
     entries_total = 0
-    with progressbar.ProgressBar(max_value=len(master_commits)) as bar:
+    with progressbar.ProgressBar(max_value=len(master_commits), widget_kwargs=widget_kwargs) as bar:
         for i, commit in enumerate(reversed(master_commits)):
             bar.update(i)
             n = 0
@@ -115,7 +121,7 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
     commit_history = {}
 
     print('Analyzing commit history')
-    with progressbar.ProgressBar(max_value=entries_total, widget_kwargs=dict(samples=10000)) as bar:
+    with progressbar.ProgressBar(max_value=entries_total, widget_kwargs=widget_kwargs) as bar:
         entries_processed = 0
         for commit in reversed(master_commits):
             t = datetime.datetime.utcfromtimestamp(commit.committed_date)
