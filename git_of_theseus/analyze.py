@@ -26,7 +26,10 @@ for _, _, filetypes, _ in pygments.lexers.get_all_lexers():
 default_filetypes.difference_update(IGNORE_PYGMENTS_FILETYPES)
 
 c = chr if sys.version_info[0] >= 3 else unichr
-widget_kwargs = dict(samples=10000, marker='\U0001f30a', right='\u26f5', left='\U0001f32c', markers=''.join(c(0x1f311 + i) for i in range(8)))
+widget_kwargs = dict(samples=10000)
+if sys.version_info[0] >= 3:
+    # Emojis!
+    widget_kwargs.update(dict(marker='\U0001f30a', right='\u26f5', left='\U0001f32c', markers=''.join(chr(0x1f311 + i) for i in range(8))))
 
 
 def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir='.', branch='master', all_filetypes=False):
