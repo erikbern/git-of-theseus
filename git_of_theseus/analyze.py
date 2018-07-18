@@ -16,6 +16,7 @@
 
 from __future__ import print_function
 import argparse, git, datetime, numpy, pygments.lexers, traceback, time, os, fnmatch, json, progressbar, sys
+import warnings
 
 # Some filetypes in Pygments are not necessarily computer code, but configuration/documentation. Let's not include those.
 IGNORE_PYGMENTS_FILETYPES = ['*.json', '*.md', '*.ps', '*.eps', '*.txt', '*.xml', '*.xsl', '*.rss', '*.xslt', '*.xsd', '*.wsdl', '*.wsf', '*.yaml', '*.yml']
@@ -41,6 +42,14 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
     curves_set = set()
     if not os.path.exists(outdir):
         os.makedirs(outdir)
+
+    try:
+        repo.git.checkout(branch)
+    except repo.exc.GitCommandError:
+        default_branch = repo.active_branch.name
+        warnings.warn("Requested branch: '{}' does not exist. Falling back to default branch: '{}'".format(branch, default_branch))
+
+        branch = default_branch
 
     print('Listing all commits')
     with progressbar.ProgressBar(max_value=progressbar.UnknownLength, widget_kwargs=widget_kwargs) as bar:
