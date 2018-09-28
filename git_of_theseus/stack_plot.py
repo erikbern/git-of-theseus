@@ -45,15 +45,15 @@ def stack_plot(input_fn, display=False, outfile='stack_plot.png', max_n=20, norm
         labels = data['labels']
     if normalize:
         y = 100. * numpy.array(y) / numpy.sum(y, axis=0)
-    pyplot.figure(figsize=(13, 8))
+    fig, ax = pyplot.subplots(figsize=(13, 8))
     pyplot.style.use('ggplot')
     ts = [dateutil.parser.parse(t) for t in data['ts']]
     colors = generate_n_colors(len(labels))
     if dont_stack:
         for color, label, series in zip(colors, labels, y):
-            pyplot.plot(ts, series, color=color, label=label, linewidth=2)
+            ax.plot(ts, series, color=color, label=label, linewidth=2)
     else:
-        pyplot.stackplot(ts, numpy.array(y), labels=labels, colors=colors)
+        ax.stackplot(ts, y, labels=labels, colors=colors)
     pyplot.legend(loc=2)
     if normalize:
         pyplot.ylabel('Share of lines of code (%)')
