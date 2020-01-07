@@ -65,6 +65,8 @@ You can also normalize it to 100%. Here's author statistics for Git:
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-git-authors-normalized.png)
 
+To plot author statistics over several repos, run `git-of-theseus-analyze` for each of the repos, then run `git-of-theseus-merge` to merge the `authors.json` files. The run `git-of-theseus-stack-plot authors.json` on the resulting file.
+
 Other stuff
 -----------
 
