@@ -20,7 +20,7 @@ After that, you can generate plots! Here are some ways you can do that:
 1. Run `git-of-theseus-stack-plot cohorts.json` which will write to `stack_plot.png`
 1. Run `git-of-theseus-survival-plot survival.json` which will write to `survival_plot.png` (run it with `--help` for some options)
 
-If you want to plot multiple repositories, have to run `git-of-theseus-analyze` separately for each project and store the data in separate directories using the `--outdir` flag. Then you can run `git-of-theseus-survival-plot <foo/survival.json> <bar/survival.json>` (optionally with the `--exp-fit` flag to fit an exponential decay)
+If you want to plot multiple repositories, have to run `git-of-theseus-analyze` separately for each project and store the data in separate directories using the `--outdir` flag. Then you can run `git-of-theseus-survival-plot <foo/survival.json> <bar/survival.json>` (optionally with the `--exp-fit` flag to fit an exponential decay) and `git-of-theseus-stack-plot <foo/authors.json> <bar/authors.json>`.
 
 Help
 ----
@@ -64,8 +64,6 @@ Plotting other stuff
 You can also normalize it to 100%. Here's author statistics for Git:
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-git-authors-normalized.png)
-
-To plot author statistics over several repos, run `git-of-theseus-analyze` for each of the repos, then run `git-of-theseus-merge` to merge the `authors.json` files. The run `git-of-theseus-stack-plot authors.json` on the resulting file.
 
 Other stuff
 -----------
