@@ -33,7 +33,7 @@ if sys.version_info[0] >= 3:
     widget_kwargs.update(dict(marker='\U0001f30a', right='\u26f5', left='\U0001f32c', markers=''.join(chr(0x1f311 + i) for i in range(8))))
 
 
-def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir='.', branch='master', all_filetypes=False):
+def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir='.', branch='master', all_filetypes=False, ignore_whitespace=False):
     repo = git.Repo(repo)
     commit2cohort = {}
     code_commits = [] # only stores a subset
@@ -107,7 +107,10 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
     def get_file_histogram(commit, path):
         h = {}
         try:
-            for old_commit, lines in repo.blame(commit, path):
+            blame_kwargs = {}
+            if ignore_whitespace:
+                blame_kwargs['w'] = True
+            for old_commit, lines in repo.blame(commit, path, **blame_kwargs):
                 cohort = commit2cohort.get(old_commit.hexsha, "MISSING")
                 _, ext = os.path.splitext(path)
                 keys = [('cohort', cohort), ('ext', ext), ('author', old_commit.author.name)]
@@ -193,6 +196,7 @@ def analyze_cmdline():
     parser.add_argument('--only', default=[], action='append', help='File patterns that have to match (can provide multiple, will all have to match)')
     parser.add_argument('--outdir', default='.', help='Output directory to store results (default: %(default)s)')
     parser.add_argument('--branch', default='master', type=str, help='Branch to track (default: %(default)s)')
+    parser.add_argument('--ignore-whitespace', default=[], action='store_true', help='Ignore whitespace changes when running git blame.')
     parser.add_argument('--all-filetypes', action='store_true', help='Include all files (if not set then will only analyze %s' % ','.join(default_filetypes))
     parser.add_argument('repo')
     kwargs = vars(parser.parse_args())
