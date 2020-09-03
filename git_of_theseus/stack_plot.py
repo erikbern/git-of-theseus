@@ -19,6 +19,7 @@ matplotlib.use('Agg')
 
 import argparse, dateutil.parser, itertools, json, numpy, sys
 from matplotlib import pyplot
+from collections import defaultdict
 
 
 def generate_n_colors(n):
@@ -32,8 +33,59 @@ def generate_n_colors(n):
     return colors
 
 
-def stack_plot(input_fn, display=False, outfile='stack_plot.png', max_n=20, normalize=False, dont_stack=False):
-    data = json.load(open(input_fn))  # TODO do we support multiple arguments here?
+def stack_plot(input_fns, display=False,
+    outfile='stack_plot.png', max_n=20, normalize=False, dont_stack=False, outmerged=False):
+    
+    loc = {}  # Helper data structure
+    authors = set()  # All authors
+    tss = set()  # All timestamps
+    for fn in input_fns:
+        print('Reading %s' % fn)
+        data = json.load(open(fn))
+        locr = defaultdict(defaultdict)
+        for i, a in enumerate(data['labels']):
+            authors.add(a)
+            locr[a] = {}
+            for j, t in enumerate(data['ts']):
+                tss.add(t)
+                locr[a][t] = data['y'][i][j]
+        loc[fn] = locr
+
+    authorss = sorted(authors)  # Authors, sorted
+    tsss = sorted(tss)  # Timestamps, sorted
+
+    merged = [[0 for j in range(len(tsss))] for i in range(len(authorss))]
+
+    for i, r in enumerate(loc):
+        # print("repo: ", r)
+        for j, a in enumerate(authorss):
+            # print("  ", a)
+            l = 0
+            for k, t in enumerate(tsss):
+                # print(r, a, t)
+                if a in loc[r].keys():
+                    if t in loc[r][a].keys():
+                        l = loc[r][a][t]
+                        # print("l = ", l)
+                merged[j][k] = merged[j][k] + l
+
+    data = {
+        'y': merged,
+        'ts': [t for t in tsss],
+        'labels': [a for a in authorss]
+    }
+    if outmerged:
+        mergefn = 'merged.json'
+        print('Writing data to %s' % mergefn)
+        f = open(mergefn, 'w')
+        json.dump(
+            {
+                'y': merged,
+                'ts': [t for t in tsss],
+                'labels': [a for a in authorss]
+            }, f)
+        f.close()
+
     y = numpy.array(data['y'])
     if y.shape[0] > max_n:
         js = sorted(range(len(data['labels'])), key=lambda j: max(y[j]), reverse=True)
@@ -74,7 +126,8 @@ def stack_plot_cmdline():
     parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (will roll everything else into "other") (default: %(default)s)')
     parser.add_argument('--normalize', action='store_true', help='Normalize the plot to 100%%')
     parser.add_argument('--dont-stack', action='store_true', help='Don\'t stack plot')
-    parser.add_argument('input_fn')
+    parser.add_argument('--outmerged', action='store_true', help='Output merged data to merged.json')
+    parser.add_argument('input_fns', nargs='*')
     kwargs = vars(parser.parse_args())
 
     stack_plot(**kwargs)
