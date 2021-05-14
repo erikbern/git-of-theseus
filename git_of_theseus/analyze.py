@@ -28,9 +28,6 @@ default_filetypes.difference_update(IGNORE_PYGMENTS_FILETYPES)
 
 c = chr if sys.version_info[0] >= 3 else unichr
 widget_kwargs = dict(samples=10000)
-if sys.version_info[0] >= 3:
-    # Emojis!
-    widget_kwargs.update(dict(marker='\U0001f30a', right='\u26f5', left='\U0001f32c', markers=''.join(chr(0x1f311 + i) for i in range(8))))
 
 
 def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir='.', branch='master', all_filetypes=False, ignore_whitespace=False):
@@ -92,6 +89,9 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
         return [entry for entry in commit.tree.traverse()
                 if entry.type == 'blob' and entry_path_ok(entry.path)]
 
+    def get_top_dir(path):
+        return os.path.dirname(path).split(os.sep)[0] + os.sep
+
     print('Counting total entries to analyze + caching filenames')
     entries_total = 0
     with progressbar.ProgressBar(max_value=len(master_commits), widget_kwargs=widget_kwargs) as bar:
@@ -102,6 +102,7 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
                 n += 1
                 _, ext = os.path.splitext(entry.path)
                 curves_set.add(('ext', ext))
+                curves_set.add(('dir', get_top_dir(entry.path)))
             entries_total += n
 
     def get_file_histogram(commit, path):
@@ -113,7 +114,7 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
             for old_commit, lines in repo.blame(commit, path, **blame_kwargs):
                 cohort = commit2cohort.get(old_commit.hexsha, "MISSING")
                 _, ext = os.path.splitext(path)
-                keys = [('cohort', cohort), ('ext', ext), ('author', old_commit.author.name)]
+                keys = [('cohort', cohort), ('ext', ext), ('author', old_commit.author.name), ('dir', get_top_dir(path))]
 
                 if old_commit.hexsha in commit2timestamp:
                     keys.append(('sha', old_commit.hexsha))
@@ -179,6 +180,7 @@ def analyze(repo, cohortfm='%Y', interval=7*24*60*60, ignore=[], only=[], outdir
     dump_json('cohorts.json', 'cohort', lambda c: 'Code added in %s' % c)
     dump_json('exts.json', 'ext')
     dump_json('authors.json', 'author')
+    dump_json('dirs.json', 'dir')
 
     # Dump survival data
     fn = os.path.join(outdir, 'survival.json')
