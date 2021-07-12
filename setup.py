@@ -10,12 +10,13 @@ setup(name='git-of-theseus',
       install_requires=[
           'gitpython',
           'numpy',
-          'progressbar2',
+          'tqdm',
+          'wcmatch',
           'pygments',
           'matplotlib',
           'scipy',
       ],
-      entry_points = {
+      entry_points={
         'console_scripts': [
           'git-of-theseus-analyze=git_of_theseus.analyze:analyze_cmdline',
           'git-of-theseus-survival-plot=git_of_theseus:survival_plot_cmdline',
