@@ -54,6 +54,14 @@ Rails – stack plot:
 
 ![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-rails.png)
 
+Tensorflow – stack plot:
+
+![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-tensorflow.png)
+
+Rust – stack plot:
+
+![git](https://raw.githubusercontent.com/erikbern/git-of-theseus/master/pics/git-rust.png)
+
 Plotting other stuff
 --------------------
 
