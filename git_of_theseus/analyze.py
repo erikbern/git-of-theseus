@@ -48,6 +48,10 @@ class MiniCommit:
         self.committed_date = commit.committed_date
 
 
+def get_top_dir(path):
+    return os.path.dirname(path).split('/')[0] + '/'  # Git/GitPython on Windows also returns paths with '/'s
+
+
 class BlameProc(multiprocessing.Process):
     def __init__(self, repo_dir, q, ret_q, run_flag, blame_kwargs, commit2cohort):
         super().__init__(daemon=True)
@@ -65,7 +69,7 @@ class BlameProc(multiprocessing.Process):
             for old_commit, lines in self.repo.blame(commit, path, **self.blame_kwargs):
                 cohort = self.commit2cohort.get(old_commit.binsha, "MISSING")
                 _, ext = os.path.splitext(path)
-                keys = [('cohort', cohort), ('ext', ext), ('author', old_commit.author.name)]
+                keys = [('cohort', cohort), ('ext', ext), ('author', old_commit.author.name), ('dir', get_top_dir(path))]
 
                 if old_commit.binsha in self.commit2cohort:
                     keys.append(('sha', old_commit.hexsha))
@@ -242,9 +246,6 @@ def analyze(repo_dir, cohortfm='%Y', interval=7 * 24 * 60 * 60, ignore=[], only=
         tmp = [MiniEntry(entry) for entry in commit.tree.traverse() if entry.type == 'blob' and entry_path_ok(entry.path)]
         all_entries.append(tmp)
         return tmp
-
-    def get_top_dir(path):
-        return os.path.dirname(path).split(os.sep)[0] + os.sep
 
     master_commits = master_commits[::-1]  # Reverse it so it's chnological ascending
     entries_total = 0
