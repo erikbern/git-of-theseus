@@ -102,13 +102,14 @@ class BlameDriver:
         self.commit2cohort = commit2cohort
         self.quiet = quiet
         self.proc_pool = []
-        self._spawn_process(self.proc_count)
+        self.spawn_process(self.proc_count)
 
-    def _spawn_process(self, n):
+    def spawn_process(self, spawn_only=False):
+        n = self.proc_count - len(self.proc_pool)
         if n == 0:
             return
         if n < 0:
-            return self._despawn_process(-n)
+            return None if spawn_only else self._despawn_process(-n)
         if not self.quiet:
             print('\n\nStarting up processes: ', end='')
         for i in range(n):
@@ -139,7 +140,7 @@ class BlameDriver:
                 return
 
     def fetch(self, commit, check_entries, bar):
-        self._spawn_process(self.proc_count - len(self.proc_pool))
+        self.spawn_process()
         processed_entries = 0
         total_entries = len(check_entries)
 
@@ -152,7 +153,9 @@ class BlameDriver:
             for key_tuple, file_locs in file_y.items():
                 self.cur_y[key_tuple] = self.cur_y.get(key_tuple, 0) + file_locs
             self.last_file_y[path] = file_y
+
             processed_entries += 1
+            self.run_flag.wait()
             bar.update()
 
         return self.cur_y
@@ -283,6 +286,7 @@ def analyze(repo_dir, cohortfm='%Y', interval=7 * 24 * 60 * 60, ignore=[], only=
                 x = int(input('\n\nCurrent Processes: {:d}\nNew Setting: '.format(blamer.proc_count)))
                 if x > 0:
                     blamer.proc_count = x
+                    blamer.spawn_process(spawn_only=True)
                 return blamer.resume()
             os._exit(1)  # sys.exit() does weird things
         except:
@@ -293,7 +297,7 @@ def analyze(repo_dir, cohortfm='%Y', interval=7 * 24 * 60 * 60, ignore=[], only=
         signal.signal(signal.SIGINT, handler)
 
     desc = '{:<55s}'.format('Analyzing commit history with {:d} processes'.format(procs))
-    with tqdm(desc='{:<55s}'.format('Entries Processed'), total=entries_total, unit=' Entries', position=1, maxinterval=1, **tqdm_args) as bar:
+    with tqdm(desc='{:<55s}'.format('Entries Processed'), total=entries_total, unit=' Entries', position=1, maxinterval=1, miniters=100, **tqdm_args) as bar:
         cbar = tqdm(master_commits, desc=desc, unit=' Commits', position=0, **tqdm_args)
         for commit in cbar:
             t = datetime.datetime.utcfromtimestamp(commit.committed_date)
