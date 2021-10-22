@@ -45,7 +45,7 @@ def stack_plot(input_fn, display=False, outfile='stack_plot.png', max_n=20, norm
         labels = data['labels']
     if normalize:
         y = 100. * numpy.array(y) / numpy.sum(y, axis=0)
-    pyplot.figure(figsize=(13, 8))
+    pyplot.figure(figsize=(16, 12), dpi=120)
     pyplot.style.use('ggplot')
     ts = [dateutil.parser.parse(t) for t in data['ts']]
     colors = generate_n_colors(len(labels))
