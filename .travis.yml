@@ -4,10 +4,9 @@ python:
   - "3.4"
 install:
   - pip install .
-before_script: # configure a headless display to test plot generation
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
+dist: xenial
+services:
+  - xvfb  
 script:
   - git clone https://github.com/erikbern/git-of-theseus
   - git-of-theseus-analyze git-of-theseus --outdir got
