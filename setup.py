@@ -1,4 +1,5 @@
 from distutils.core import setup
+import setuptools
 
 setup(name='git-of-theseus',
       version='0.3.0',
