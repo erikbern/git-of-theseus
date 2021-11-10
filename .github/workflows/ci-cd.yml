@@ -1,0 +1,40 @@
+name: Build and run
+
+on: [push]
+
+env:
+  DISPLAY: ":99.0"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+    name: Tests on Python ${{ matrix.python-version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package
+        run: pip install .
+
+      - name: Run tests
+        run: |
+          git clone https://github.com/erikbern/git-of-theseus
+          git-of-theseus-analyze git-of-theseus --outdir got
+          git-of-theseus-stack-plot got/cohorts.json
+          git-of-theseus-stack-plot got/cohorts.json --normalize
+          git-of-theseus-stack-plot got/exts.json
+          git-of-theseus-stack-plot got/authors.json
+          git-of-theseus-line-plot got/authors.json
+          git-of-theseus-line-plot got/dirs.json
+          git-of-theseus-survival-plot got/survival.json --exp-fit
+          git-of-theseus-analyze --help
+          git-of-theseus-stack-plot --help
+          git-of-theseus-survival-plot --help
