@@ -15,10 +15,13 @@ Running
 
 First, you need to run `git-of-theseus-analyze <path to repo>` (see `git-of-theseus-analyze --help` for a bunch of config). This will analyze a repository and might take quite some time.
 
-After that, you can generate plots! Here are some ways you can do that:
+After that, you can generate plots! Some examples:
 
-1. Run `git-of-theseus-stack-plot cohorts.json` which will write to `stack_plot.png`
-1. Run `git-of-theseus-survival-plot survival.json` which will write to `survival_plot.png` (run it with `--help` for some options)
+1. Run `git-of-theseus-stack-plot cohorts.json` will create a stack plot showing the total amount of code broken down into cohorts (what year the code was added)
+1. Run `git-of-theseus-line-plot authors.json --normalize` will show a plot of the % of code contributed by the top 20 authors
+1. Run `git-of-theseus-survival-plot survival.json`
+
+You can run `--help` to see various options.
 
 If you want to plot multiple repositories, have to run `git-of-theseus-analyze` separately for each project and store the data in separate directories using the `--outdir` flag. Then you can run `git-of-theseus-survival-plot <foo/survival.json> <bar/survival.json>` (optionally with the `--exp-fit` flag to fit an exponential decay)
 
