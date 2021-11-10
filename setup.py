@@ -20,7 +20,8 @@ setup(name='git-of-theseus',
         'console_scripts': [
           'git-of-theseus-analyze=git_of_theseus.analyze:analyze_cmdline',
           'git-of-theseus-survival-plot=git_of_theseus:survival_plot_cmdline',
-          'git-of-theseus-stack-plot=git_of_theseus:stack_plot_cmdline'
+          'git-of-theseus-stack-plot=git_of_theseus:stack_plot_cmdline',
+          'git-of-theseus-line-plot=git_of_theseus:line_plot_cmdline',
       ]
   }
 )

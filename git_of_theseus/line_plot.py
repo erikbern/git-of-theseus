@@ -20,33 +20,28 @@ matplotlib.use('Agg')
 import argparse, dateutil.parser, json, numpy, sys
 from matplotlib import pyplot
 
+
 from .utils import generate_n_colors
 
 
-def stack_plot(input_fn, display=False, outfile='stack_plot.png', max_n=20, normalize=False):
+def line_plot(input_fn, display=False, outfile='line_plot.png', max_n=20):
     data = json.load(open(input_fn))  # TODO do we support multiple arguments here?
     y = numpy.array(data['y'])
     if y.shape[0] > max_n:
         js = sorted(range(len(data['labels'])), key=lambda j: max(y[j]), reverse=True)
-        other_sum = numpy.sum(y[j] for j in js[max_n:])
         top_js = sorted(js[:max_n], key=lambda j: data['labels'][j])
-        y = numpy.array([y[j] for j in top_js] + [other_sum])
-        labels = [data['labels'][j] for j in top_js] + ['other']
+        y = numpy.array([y[j] for j in top_js])
+        labels = [data['labels'][j] for j in top_js]
     else:
         labels = data['labels']
-    if normalize:
-        y = 100. * numpy.array(y) / numpy.sum(y, axis=0)
     pyplot.figure(figsize=(16, 12), dpi=120)
     pyplot.style.use('ggplot')
     ts = [dateutil.parser.parse(t) for t in data['ts']]
     colors = generate_n_colors(len(labels))
-    pyplot.stackplot(ts, numpy.array(y), labels=labels, colors=colors)
+    for color, label, series in zip(colors, labels, y):
+        pyplot.plot(ts, series, color=color, label=label, linewidth=3)
     pyplot.legend(loc=2)
-    if normalize:
-        pyplot.ylabel('Share of lines of code (%)')
-        pyplot.ylim([0, 100])
-    else:
-        pyplot.ylabel('Lines of code')
+    pyplot.ylabel('Lines of code')
     print('Writing output to %s' % outfile)
     pyplot.savefig(outfile)
     pyplot.tight_layout()
@@ -54,17 +49,16 @@ def stack_plot(input_fn, display=False, outfile='stack_plot.png', max_n=20, norm
         pyplot.show()
 
 
-def stack_plot_cmdline():
-    parser = argparse.ArgumentParser(description='Plot stack plot')
+def line_plot_cmdline():
+    parser = argparse.ArgumentParser(description='Plot line plot')
     parser.add_argument('--display', action='store_true', help='Display plot')
-    parser.add_argument('--outfile', default='stack_plot.png', type=str, help='Output file to store results (default: %(default)s)')
-    parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (will roll everything else into "other") (default: %(default)s)')
-    parser.add_argument('--normalize', action='store_true', help='Normalize the plot to 100%%')
+    parser.add_argument('--outfile', default='line_plot.png', type=str, help='Output file to store results (default: %(default)s)')
+    parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (default: %(default)s)')
     parser.add_argument('input_fn')
     kwargs = vars(parser.parse_args())
 
-    stack_plot(**kwargs)
+    line_plot(**kwargs)
 
 
 if __name__ == '__main__':
-    stack_plot_cmdline()
+    line_plot_cmdline()
