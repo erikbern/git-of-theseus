@@ -24,9 +24,10 @@ from matplotlib import pyplot
 from .utils import generate_n_colors
 
 
-def line_plot(input_fn, display=False, outfile='line_plot.png', max_n=20):
+def line_plot(input_fn, display=False, outfile='line_plot.png', max_n=20, normalize=False):
     data = json.load(open(input_fn))  # TODO do we support multiple arguments here?
     y = numpy.array(data['y'])
+    y_sums = numpy.sum(y, axis=0)
     if y.shape[0] > max_n:
         js = sorted(range(len(data['labels'])), key=lambda j: max(y[j]), reverse=True)
         top_js = sorted(js[:max_n], key=lambda j: data['labels'][j])
@@ -34,6 +35,8 @@ def line_plot(input_fn, display=False, outfile='line_plot.png', max_n=20):
         labels = [data['labels'][j] for j in top_js]
     else:
         labels = data['labels']
+    if normalize:
+        y = 100. * y / y_sums
     pyplot.figure(figsize=(16, 12), dpi=120)
     pyplot.style.use('ggplot')
     ts = [dateutil.parser.parse(t) for t in data['ts']]
@@ -41,7 +44,11 @@ def line_plot(input_fn, display=False, outfile='line_plot.png', max_n=20):
     for color, label, series in zip(colors, labels, y):
         pyplot.plot(ts, series, color=color, label=label, linewidth=3)
     pyplot.legend(loc=2)
-    pyplot.ylabel('Lines of code')
+    if normalize:
+        pyplot.ylabel('Share of lines of code (%)')
+        pyplot.ylim([0, 100])
+    else:
+        pyplot.ylabel('Lines of code')
     print('Writing output to %s' % outfile)
     pyplot.savefig(outfile)
     pyplot.tight_layout()
@@ -54,6 +61,7 @@ def line_plot_cmdline():
     parser.add_argument('--display', action='store_true', help='Display plot')
     parser.add_argument('--outfile', default='line_plot.png', type=str, help='Output file to store results (default: %(default)s)')
     parser.add_argument('--max-n', default=20, type=int, help='Max number of dataseries (default: %(default)s)')
+    parser.add_argument('--normalize', action='store_true', help='Plot the share of each, so it adds up to 100%%')
     parser.add_argument('input_fn')
     kwargs = vars(parser.parse_args())
 
