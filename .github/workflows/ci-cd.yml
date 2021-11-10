@@ -32,6 +32,8 @@ jobs:
           git-of-theseus-stack-plot got/cohorts.json --normalize
           git-of-theseus-stack-plot got/exts.json
           git-of-theseus-stack-plot got/authors.json
+          git-of-theseus-line-plot got/authors.json
+          git-of-theseus-line-plot got/dirs.json
           git-of-theseus-survival-plot got/survival.json --exp-fit
           git-of-theseus-analyze --help
           git-of-theseus-stack-plot --help
