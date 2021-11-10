@@ -1,4 +1,3 @@
-[![travis badge](https://img.shields.io/travis/erikbern/git-of-theseus/master.svg?style=flat)](https://travis-ci.org/erikbern/git-of-theseus)
 [![pypi badge](https://img.shields.io/pypi/v/git-of-theseus.svg?style=flat)](https://pypi.python.org/pypi/git-of-theseus)
 
 Some scripts to analyze Git repos. Produces cool looking graphs like this (running it on [git](https://github.com/git/git) itself):
