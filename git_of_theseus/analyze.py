@@ -69,7 +69,13 @@ class BlameProc(multiprocessing.Process):
             for old_commit, lines in self.repo.blame(commit, path, **self.blame_kwargs):
                 cohort = self.commit2cohort.get(old_commit.binsha, "MISSING")
                 _, ext = os.path.splitext(path)
-                keys = [('cohort', cohort), ('ext', ext), ('author', old_commit.author.name), ('dir', get_top_dir(path))]
+                keys = [
+                    ('cohort', cohort),
+                    ('ext', ext),
+                    ('author', old_commit.author.name),
+                    ('dir', get_top_dir(path)),
+                    ('domain', old_commit.author.email.split('@')[-1]),
+                ]
 
                 if old_commit.binsha in self.commit2cohort:
                     keys.append(('sha', old_commit.hexsha))
@@ -212,6 +218,7 @@ def analyze(repo_dir, cohortfm='%Y', interval=7 * 24 * 60 * 60, ignore=[], only=
         commit2cohort[commit.binsha] = cohort
         curve_key_tuples.add(('cohort', cohort))
         curve_key_tuples.add(('author', commit.author.name))
+        curve_key_tuples.add(('domain', commit.author.email.split('@')[-1]))
 
     desc = '{:<55s}'.format('Backtracking the master branch')
     with tqdm(desc=desc, unit=' Commits', **tqdm_args) as bar:
@@ -359,6 +366,7 @@ def analyze(repo_dir, cohortfm='%Y', interval=7 * 24 * 60 * 60, ignore=[], only=
     dump_json('exts.json', 'ext')
     dump_json('authors.json', 'author')
     dump_json('dirs.json', 'dir')
+    dump_json('domains.json', 'domain')
 
     # Dump survival data
     fn = os.path.join(outdir, 'survival.json')
