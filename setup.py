@@ -15,7 +15,6 @@ setup(name='git-of-theseus',
           'wcmatch',
           'pygments',
           'matplotlib',
-          'scipy',
       ],
       entry_points={
         'console_scripts': [

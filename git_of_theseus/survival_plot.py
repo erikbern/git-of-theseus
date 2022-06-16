@@ -17,7 +17,7 @@
 import matplotlib
 matplotlib.use('Agg')
 
-import sys, dateutil.parser, numpy, json, collections, math, scipy.optimize, argparse, os
+import sys, dateutil.parser, numpy, json, collections, math, argparse, os
 
 from matplotlib import pyplot
 
@@ -83,6 +83,7 @@ def survival_plot(input_fns, exp_fit=False, display=False, outfile='survival_plo
         return loss
 
     if exp_fit:
+        import scipy.optimize
         print('fitting exponential function')
         k = scipy.optimize.fmin(fit, 0.5, maxiter=50)[0]
         ts = numpy.linspace(0, years, 1000)
