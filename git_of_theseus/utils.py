@@ -16,12 +16,18 @@
 
 import itertools, numpy
 
+
 def generate_n_colors(n):
-    vs = numpy.linspace(.4, .9, 6)
-    colors = [(.9, .4, .4)]
+    vs = numpy.linspace(0.4, 0.9, 6)
+    colors = [(0.9, 0.4, 0.4)]
+
     def euclidean(a, b):
-        return sum((x-y)**2 for x, y in zip(a, b))
+        return sum((x - y) ** 2 for x, y in zip(a, b))
+
     while len(colors) < n:
-        new_color = max(itertools.product(vs, vs, vs), key=lambda a: min(euclidean(a, b) for b in colors))
+        new_color = max(
+            itertools.product(vs, vs, vs),
+            key=lambda a: min(euclidean(a, b) for b in colors),
+        )
         colors.append(new_color)
     return colors
