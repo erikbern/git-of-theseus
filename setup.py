@@ -2,7 +2,7 @@ from distutils.core import setup
 import setuptools
 
 setup(name='git-of-theseus',
-      version='0.3.0',
+      version='0.3.1',
       description='Plot stats on Git repositories',
       author='Erik Bernhardsson',
       author_email='mail@erikbern.com',

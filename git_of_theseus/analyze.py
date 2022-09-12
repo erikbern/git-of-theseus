@@ -234,6 +234,8 @@ def analyze(repo_dir, cohortfm='%Y', interval=7 * 24 * 60 * 60, ignore=[], only=
             commit = commit.parents[0]
         del commit
 
+    if ignore and not only:
+        only = ['**']  # stupid fix
     def_ft_str = '+({:s})'.format('|'.join(default_filetypes))
     path_match_str = '{:s}|!+({:s})'.format('|'.join(only), '|'.join(ignore))
     path_match_zero = len(only) == 0 and len(ignore) == 0
@@ -381,8 +383,8 @@ def analyze_cmdline():
     parser = argparse.ArgumentParser(description='Analyze git repo')
     parser.add_argument('--cohortfm', default='%Y', type=str, help='A Python datetime format string such as "%%Y" for creating cohorts (default: %(default)s)')
     parser.add_argument('--interval', default=7 * 24 * 60 * 60, type=int, help='Min difference between commits to analyze (default: %(default)ss)')
-    parser.add_argument('--ignore', default=[], action='append', help='File patterns that should be ignored (can provide multiple, will each subtract independently)')
-    parser.add_argument('--only', default=[], action='append', help='File patterns that can match (can provide multiple, will match any one)')
+    parser.add_argument('--ignore', default=[], action='append', help='File patterns that should be ignored (can provide multiple, will each subtract independently). Uses glob syntax and generally needs to be shell escaped. For instance, to ignore a subdirectory `foo/`, run `git-of-theseus . --ignore \'foo/**\'`.')
+    parser.add_argument('--only', default=[], action='append', help='File patterns that can match. Multiple can be provided. If at least one is provided, every file has to match at least one. Uses glob syntax and typically has to be shell escaped. In order to analytize a subdirectory `bar/`, run `git-of-theseus . --only \'bar/**\'`')
     parser.add_argument('--outdir', default='.', help='Output directory to store results (default: %(default)s)')
     parser.add_argument('--branch', default='master', type=str, help='Branch to track (default: %(default)s)')
     parser.add_argument('--ignore-whitespace', default=[], action='store_true', help='Ignore whitespace changes when running git blame.')
