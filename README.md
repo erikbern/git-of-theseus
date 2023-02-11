@@ -67,7 +67,7 @@ Rust – stack plot:
 Plotting other stuff
 --------------------
 
-`git-of-theseus-analyze` will write `exts.json`, `cohorts.json` and `authors.json`. You can run `git-of-theseus-stack-plot authors.json` to plot author statistics as well, or `git-of-theseus-stack-plot exts.json` to plot file extension statistics. For author statistics, you might want to create a [.mailmap](https://git-scm.com/docs/gitmailmap) file in the root directory of the repository to deduplicate authors. If you need to create a .mailmap file the following scripts can list the distinct author-email combinations in a repository:
+`git-of-theseus-analyze` will write `exts.json`, `cohorts.json` and `authors.json`. You can run `git-of-theseus-stack-plot authors.json` to plot author statistics as well, or `git-of-theseus-stack-plot exts.json` to plot file extension statistics. For author statistics, you might want to create a [.mailmap](https://git-scm.com/docs/gitmailmap) file in the root directory of the repository to deduplicate authors. If you need to create a .mailmap file the following command can list the distinct author-email combinations in a repository:
 
 Mac / Linux
 
@@ -78,7 +78,7 @@ git log --pretty=format:"%an %ae" | sort | uniq
 Windows Powershell
 
 ```powershell
-git log --pretty=format:"%an %ae" | Select-Object -Unique
+git log --pretty=format:"%an %ae" | Sort-Object | Select-Object -Unique
 ```
 
 For instance, here's the author statistics for [Kubernetes](https://github.com/kubernetes/kubernetes):
