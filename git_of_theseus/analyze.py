@@ -16,14 +16,16 @@
 
 import argparse
 import datetime
-import git
+import functools
 import json
 import multiprocessing
 import os
-import pygments.lexers
-import warnings
 import signal
+import warnings
+from pathlib import Path
 
+import git
+import pygments.lexers
 from tqdm import tqdm
 from wcmatch import fnmatch
 
@@ -70,7 +72,9 @@ def get_top_dir(path):
 
 
 class BlameProc(multiprocessing.Process):
-    def __init__(self, repo_dir, q, ret_q, run_flag, blame_kwargs, commit2cohort):
+    def __init__(
+        self, repo_dir, q, ret_q, run_flag, blame_kwargs, commit2cohort, use_mailmap
+    ):
         super().__init__(daemon=True)
         self.repo: git.Repo = git.Repo(repo_dir)
         self.q: multiprocessing.Queue = q
@@ -78,6 +82,7 @@ class BlameProc(multiprocessing.Process):
         self.run_flag: multiprocessing.Event = run_flag
         self.blame_kwargs = dict(blame_kwargs)
         self.commit2cohort = commit2cohort  # On Unix systems if process is started via the `fork` method, could make this a copy-on-write variable to save RAM
+        self.use_mailmap = use_mailmap
 
     # Get Blame data for a `file` at `commit`
     def get_file_histogram(self, path, commit):
@@ -86,12 +91,21 @@ class BlameProc(multiprocessing.Process):
             for old_commit, lines in self.repo.blame(commit, path, **self.blame_kwargs):
                 cohort = self.commit2cohort.get(old_commit.binsha, "MISSING")
                 _, ext = os.path.splitext(path)
+                if self.use_mailmap:
+                    author_name, author_email = get_mailmap_author_name_email(
+                        self.repo, old_commit.author.name, old_commit.author.email
+                    )
+                else:
+                    author_name, author_email = (
+                        old_commit.author.name,
+                        old_commit.author.email,
+                    )
                 keys = [
                     ("cohort", cohort),
                     ("ext", ext),
-                    ("author", old_commit.author.name),
+                    ("author", author_name),
                     ("dir", get_top_dir(path)),
-                    ("domain", old_commit.author.email.split("@")[-1]),
+                    ("domain", author_email.split("@")[-1]),
                 ]
 
                 if old_commit.binsha in self.commit2cohort:
@@ -124,6 +138,7 @@ class BlameDriver:
         cur_y,
         blame_kwargs,
         commit2cohort,
+        use_mailmap,
         quiet,
     ):
         self.repo_dir = repo_dir
@@ -136,6 +151,7 @@ class BlameDriver:
         self.cur_y = cur_y
         self.blame_kwargs = blame_kwargs
         self.commit2cohort = commit2cohort
+        self.use_mailmap = use_mailmap
         self.quiet = quiet
         self.proc_pool = []
         self.spawn_process(self.proc_count)
@@ -157,6 +173,7 @@ class BlameDriver:
                     self.run_flag,
                     self.blame_kwargs,
                     self.commit2cohort,
+                    self.use_mailmap,
                 )
             )
             self.proc_pool[-1].start()
@@ -232,6 +249,7 @@ def analyze(
     quiet=False,
     opt=False,
 ):
+    use_mailmap = (Path(repo_dir) / ".mailmap").exists()
     repo = git.Repo(repo_dir)
     blame_kwargs = {}
     if ignore_whitespace:
@@ -286,8 +304,14 @@ def analyze(
         )
         commit2cohort[commit.binsha] = cohort
         curve_key_tuples.add(("cohort", cohort))
-        curve_key_tuples.add(("author", commit.author.name))
-        curve_key_tuples.add(("domain", commit.author.email.split("@")[-1]))
+        if use_mailmap:
+            author_name, author_email = get_mailmap_author_name_email(
+                repo, commit.author.name, commit.author.email
+            )
+        else:
+            author_name, author_email = commit.author.name, commit.author.email
+        curve_key_tuples.add(("author", author_name))
+        curve_key_tuples.add(("domain", author_email.split("@")[-1]))
 
     desc = "{:<55s}".format("Backtracking the master branch")
     with tqdm(desc=desc, unit=" Commits", **tqdm_args) as bar:
@@ -345,7 +369,7 @@ def analyze(
         desc="{:<55s}".format("Entries Discovered"),
         unit=" Entries",
         position=1,
-        **tqdm_args
+        **tqdm_args,
     ) as bar:
         for i, commit in enumerate(
             tqdm(master_commits, desc=desc, unit=" Commits", position=0, **tqdm_args)
@@ -373,7 +397,14 @@ def analyze(
     )  # Contributions of each individual file to each individual curve, when the file was last seen
     cur_y = {}  # Sum of all contributions between files towards each individual curve
     blamer = BlameDriver(
-        repo_dir, procs, last_file_y, cur_y, blame_kwargs, commit2cohort, quiet
+        repo_dir,
+        procs,
+        last_file_y,
+        cur_y,
+        blame_kwargs,
+        commit2cohort,
+        use_mailmap,
+        quiet,
     )
     commit_history = (
         {}
@@ -423,7 +454,7 @@ def analyze(
         position=1,
         maxinterval=1,
         miniters=100,
-        **tqdm_args
+        **tqdm_args,
     ) as bar:
         cbar = tqdm(master_commits, desc=desc, unit=" Commits", position=0, **tqdm_args)
         for commit in cbar:
@@ -511,6 +542,14 @@ def analyze(
         print("Writing survival data to %s" % fn)
     json.dump(commit_history, f)
     f.close()
+
+
+@functools.cache
+def get_mailmap_author_name_email(repo, author_name, author_email):
+    pre_mailmap_author_email = f"{author_name} <{author_email}>"
+    mail_mapped_author_email: str = repo.git.check_mailmap(pre_mailmap_author_email)
+    mailmap_name, mailmap_email = mail_mapped_author_email[:-1].split(" <", maxsplit=1)
+    return mailmap_name, mailmap_email
 
 
 def analyze_cmdline():
