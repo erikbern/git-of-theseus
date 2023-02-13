@@ -22,7 +22,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install package
-        run: pip install .
+        run: | 
+          pip install .
+          pip install scipy
 
       - name: Run tests
         run: |
