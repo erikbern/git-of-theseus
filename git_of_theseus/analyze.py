@@ -544,7 +544,7 @@ def analyze(
     f.close()
 
 
-@functools.cache
+@functools.lru_cache(maxsize=None)
 def get_mailmap_author_name_email(repo, author_name, author_email):
     pre_mailmap_author_email = f"{author_name} <{author_email}>"
     mail_mapped_author_email: str = repo.git.check_mailmap(pre_mailmap_author_email)

@@ -18,8 +18,14 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import sys, dateutil.parser, numpy, json, collections, math, argparse, os
+import argparse
+import collections
+import json
+import math
+import os
+import sys
 
+import numpy
 from matplotlib import pyplot
 
 
@@ -86,7 +92,10 @@ def survival_plot(
         return loss
 
     if exp_fit:
-        import scipy.optimize
+        try:
+            import scipy.optimize
+        except ImportError:
+            sys.exit("Scipy is a required dependency when using the --exp-fit flag")
 
         print("fitting exponential function")
         k = scipy.optimize.fmin(fit, 0.5, maxiter=50)[0]
