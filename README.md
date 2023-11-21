@@ -92,4 +92,4 @@ You can also normalize it to 100%. Here's author statistics for Git:
 Other stuff
 -----------
 
-[Markovtsev Vadim](https://twitter.com/tmarkhor) implemented a very similar analysis that claims to be 20%-6x faster than Git of Theseus. It's named [Hercules](https://github.com/src-d/hercules) and there's a great [blog post](https://blog.sourced.tech/post/hercules/) about all the complexity going into the analysis of Git history.
+[Markovtsev Vadim](https://twitter.com/tmarkhor) implemented a very similar analysis that claims to be 20%-6x faster than Git of Theseus. It's named [Hercules](https://github.com/src-d/hercules) and there's a great [blog post](https://web.archive.org/web/20180918135417/https://blog.sourced.tech/post/hercules.v4/) about all the complexity going into the analysis of Git history.
