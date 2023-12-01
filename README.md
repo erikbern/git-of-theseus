@@ -1,4 +1,5 @@
 [![pypi badge](https://img.shields.io/pypi/v/git-of-theseus.svg?style=flat)](https://pypi.python.org/pypi/git-of-theseus)
+[![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
 
 Some scripts to analyze Git repos. Produces cool looking graphs like this (running it on [git](https://github.com/git/git) itself):
 
